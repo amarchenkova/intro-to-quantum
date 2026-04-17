@@ -169,8 +169,8 @@ function col(d){
   return gC[d.geo]||"#6d5ffa";
 }
 function getR(d){
-  const b=12;
-  if(cSize==="equal")return b+4;
+  const b=14;
+  if(cSize==="equal")return 22;
   if(cSize==="qubits"&&d.q)return b+Math.pow(d.q/4400,.4)*24;
   if(cSize==="funding"&&d.fund)return b+Math.pow(d.fund/558,.4)*22;
   if(cSize==="fidelity"&&d.f)return b+(d.f-99)*10;
