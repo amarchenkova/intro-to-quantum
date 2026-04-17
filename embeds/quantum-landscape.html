@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superconducting Quantum Landscape 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Syne:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#08080e;--s1:#0f0f17;--s2:#13131e;
+--b0:rgba(255,255,255,.06);--b1:rgba(255,255,255,.11);
+--tx:#e8e8f2;--mu:rgba(232,232,242,.42);--ac:#6d5ffa;
+}
+body{background:var(--bg);font-family:"IBM Plex Mono",monospace;color:var(--tx);}
+.wrap{max-width:1180px;margin:0 auto;}
+header{padding:1.75rem 2rem 1.25rem;border-bottom:1px solid var(--b0);}
+.brand{font-size:9px;letter-spacing:.18em;color:var(--ac);text-transform:uppercase;margin-bottom:5px;}
+h1{font-family:"Syne",sans-serif;font-size:clamp(16px,2.6vw,26px);font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
+.sub{font-size:10px;color:var(--mu);line-height:1.6;max-width:660px;}
+.srow{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--b0);}
+.stat{padding:.7rem 1.2rem;border-right:1px solid var(--b0);}
+.stat:last-child{border-right:none;}
+.sn{font-family:"Syne",sans-serif;font-size:16px;font-weight:700;}
+.sl{font-size:7px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;margin-top:1px;}
+.ctrl-bar{padding:.75rem 2rem;display:flex;gap:1.1rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--b0);background:var(--s1);}
+.cl{font-size:8px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;}
+.bgrp{display:flex;gap:2px;flex-wrap:wrap;}
+.btn{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 8px;border:1px solid var(--b0);background:transparent;color:var(--mu);cursor:pointer;border-radius:2px;transition:all .12s;}
+.btn:hover{border-color:var(--b1);color:var(--tx);}
+.btn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
+select{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 6px;border:1px solid var(--b0);background:var(--s2);color:var(--tx);border-radius:2px;cursor:pointer;}
+.ca{position:relative;width:100%;height:660px;background:var(--s1);}
+#sv{width:100%;height:100%;}
+.node{cursor:pointer;}
+.node circle{transition:filter .12s;}
+.node:hover circle{filter:brightness(1.5);}
+.node.faded circle{opacity:.22;stroke-dasharray:3,2;}
+.node.faded text{opacity:.28;}
+.clbl{font-family:"IBM Plex Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;fill:rgba(255,255,255,.16);pointer-events:none;}
+.tip{position:absolute;background:#10101b;border:1px solid rgba(255,255,255,.11);border-radius:5px;padding:10px 12px;pointer-events:none;opacity:0;transition:opacity .1s;max-width:255px;z-index:99;font-size:9px;box-shadow:0 10px 36px rgba(0,0,0,.7);}
+.tip.on{opacity:1;}
+.tn{font-family:"Syne",sans-serif;font-size:11px;font-weight:700;margin-bottom:6px;line-height:1.3;}
+.tb{font-size:7px;padding:1px 4px;border-radius:2px;letter-spacing:.05em;margin-left:4px;vertical-align:middle;}
+.tr{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.tr:last-of-type{border:none;}
+.tk{color:var(--mu);font-size:8px;}
+.tv{font-size:8px;text-align:right;}
+.tnote{margin-top:5px;font-size:8px;color:var(--mu);line-height:1.5;font-style:italic;}
+.leg{padding:.65rem 2rem;display:flex;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--b0);background:var(--s1);}
+.li{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--mu);}
+.ld{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.fn{font-size:8px;color:var(--mu);padding:.5rem 2rem .9rem;opacity:.5;background:var(--s1);}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">Quantum Frontier &middot; Strange Quark Capital &middot; April 2026</div>
+  <h1>Every Superconducting Quantum Company in the World, 2026</h1>
+  <div class="sub">45 companies and government entities across 15 countries. Hover any node for full detail. Cluster, filter, and resize by any dimension.</div>
+</header>
+<div class="srow">
+  <div class="stat"><div class="sn">45</div><div class="sl">Companies</div></div>
+  <div class="stat"><div class="sn">15</div><div class="sl">Countries</div></div>
+  <div class="stat"><div class="sn">14</div><div class="sl">US entities</div></div>
+  <div class="stat"><div class="sn">10</div><div class="sl">China entities</div></div>
+  <div class="stat"><div class="sn">2</div><div class="sl">Acquired 12mo</div></div>
+  <div class="stat"><div class="sn">2</div><div class="sl">Defunct 2023-24</div></div>
+  <div class="stat"><div class="sn">~70%</div><div class="sl">Use transmon</div></div>
+</div>
+<div class="ctrl-bar">
+  <div style="display:flex;align-items:center;gap:6px"><span class="cl">Cluster</span>
+    <div class="bgrp">
+      <button class="btn on" onclick="setC('geo',this)">Geography</button>
+      <button class="btn" onclick="setC('status',this)">Status</button>
+      <button class="btn" onclick="setC('type',this)">Qubit type</button>
+      <button class="btn" onclick="setC('none',this)">Free</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px"><span class="cl">Size</span>
+    <select onchange="setS(this.value)">
+      <option value="equal">Equal</option>
+      <option value="qubits">Qubit count</option>
+      <option value="funding">Funding raised</option>
+      <option value="fidelity">2Q fidelity</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px"><span class="cl">Filter</span>
+    <div class="bgrp">
+      <button class="btn on" onclick="setF('all',this)">All 45</button>
+      <button class="btn" onclick="setF('active',this)">Active only</button>
+      <button class="btn" onclick="setF('US',this)">US</button>
+      <button class="btn" onclick="setF('China',this)">China</button>
+      <button class="btn" onclick="setF('Europe',this)">Europe</button>
+    </div>
+  </div>
+</div>
+<div class="ca"><svg id="sv"></svg><div class="tip" id="tip"></div></div>
+<div class="leg" id="leg"></div>
+<div class="fn">&#8856; Faded dashed = acquired or defunct &nbsp;&middot;&nbsp; Source: Quantum Frontier research, April 2026</div>
+</div>
+<script>
+const D=[
+{n:"IBM Quantum",s:"IBM",type:"Transmon",status:"Hyperscaler",geo:"US",q:1121,f:99.5,fund:null,rev:null,yr:2012,note:"World's largest fleet: 80+ cloud SC systems. Heron R2 (156q); Condor (1,121q). Kookaburra 2026: first LPU architecture. Roadmap to 200 logical qubits by 2028."},
+{n:"Google QAI",s:"Google",type:"Transmon",status:"Hyperscaler",geo:"US",q:105,f:99.88,fund:null,rev:null,yr:2012,note:"Willow: first verified quantum advantage (Oct 2025), 13,000x faster than classical. 99.97% 1Q, 99.88% 2Q fidelity. T1 ~100µs. Acquired Atlantic Quantum Oct 2025."},
+{n:"AWS / Ocelot",s:"AWS",type:"Cat qubit",status:"Hyperscaler",geo:"US",q:14,f:null,fund:null,rev:null,yr:2017,note:"Ocelot (Feb 2025): 5 cat qubits + 4 transmon ancilla. Claims 90% QEC overhead reduction. Built at Caltech. Operates Braket cloud: most hardware-agnostic quantum platform."},
+{n:"Microsoft",s:"MSFT",type:"Topological SC",status:"Corporate",geo:"US",q:null,f:null,fund:null,rev:null,yr:2014,note:"Majorana 1 (Feb 2025): topoconductors hosting Majorana zero modes. Not conventional SC qubits but superconducting physics. Highest-risk, highest-reward bet in quantum."},
+{n:"Rigetti Computing",s:"Rigetti",type:"Transmon",status:"Public",geo:"US",q:108,f:99.5,fund:200,rev:8,yr:2013,note:"Only public company with own fab (Fab-1, Fremont CA). Cepheus-1 108q at 99.5% 2Q fidelity. Lyra 336q roadmap. $450M cash. $8.4M C-DAC India order Jan 2026."},
+{n:"D-Wave",s:"D-Wave",type:"Annealing",status:"Public",geo:"US",q:4400,f:null,fund:null,rev:24.6,yr:1999,note:"World's first commercial QC (1999). Advantage2: 4,400+ annealing qubits. Acquired QCI $550M (Jan 2026): now only dual-platform (annealing + gate-model) company."},
+{n:"Northrop Grumman",s:"Northrop",type:"Transmon",status:"Corporate",geo:"US",q:null,f:null,fund:null,rev:null,yr:2015,note:"Transformational Technology dept: proprietary SC electronics + qubit tech. Operates dilution refrigerators. $12.5M committed to Virginia Tech quantum research. Defense R&D only."},
+{n:"SEEQC",s:"SEEQC",type:"SFQ",status:"Private",geo:"US",q:null,f:null,fund:30,rev:null,yr:2019,note:"Hypres spinoff. SC qubits + SFQ cryogenic co-processors. 115+ patents. $30M raised Jan 2025. Labs in NY, London, Naples. NVIDIA GPU-QPU collab. SPAC pending."},
+{n:"Qolab",s:"Qolab",type:"Wafer-scale SC",status:"Private",geo:"US",q:null,f:null,fund:16,rev:null,yr:2022,note:"Founded by John Martinis (Nobel 2025) + Alan Ho (ex-Google QAI). 300mm wafer-scale fab with Applied Materials. First chip at Israeli QCC Dec 2025. DARPA QBI. $16M Series A."},
+{n:"Bleximo",s:"Bleximo",type:"App-specific SC",status:"Private",geo:"US",q:null,f:null,fund:1.5,rev:null,yr:2017,note:"Application-specific SC QC (qASIC) for molecular simulation. Berkeley CA. Seed stage. Founder: Alexei Marchenkov."},
+{n:"HPE",s:"HPE",type:"Transmon",status:"Corporate",geo:"US",q:null,f:null,fund:null,rev:null,yr:2015,note:"DARPA QBI Stage A: superconducting qubits with advanced fabrication. Details undisclosed. Collaborating with Qolab. Houston TX."},
+{n:"QCI (acq. D-Wave)",s:"QCI",type:"Dual-rail",status:"Acquired",geo:"US",q:8,f:99.9,fund:90,rev:null,yr:2015,acq:true,acqBy:"D-Wave",acqY:2026,acqP:550,note:"Yale spinoff by Schoelkopf + Devoret (Nobel 2025) + Frunzio. Dual-rail cavity qubits with built-in per-qubit error detection. Acquired D-Wave Jan 2026 for $550M."},
+{n:"Atlantic Quantum",s:"Atl.Q",type:"Fluxonium",status:"Acquired",geo:"US",q:null,f:99.9,fund:null,rev:null,yr:2022,acq:true,acqBy:"Google",acqY:2025,acqP:null,note:"MIT spinoff by Will Oliver. Fluxonium + modular chip stack. 99.998% single-qubit fidelity world record. Acquired Google Oct 2025."},
+{n:"Nord Quantique",s:"Nord Q",type:"Bosonic GKP",status:"Private",geo:"Canada",q:null,f:null,fund:16,rev:null,yr:2020,note:"Sherbrooke spinoff. First QEC extending qubit lifetime on single physical qubit. 1:1 physical-to-logical ratio via GKP codes. DARPA QBI Stage B. CA$23M from CQCP."},
+{n:"Anyon Systems",s:"Anyon",type:"Transmon",status:"Private",geo:"Canada",q:null,f:null,fund:23,rev:null,yr:2014,note:"Only company designing every SC QC subsystem in-house: qubits, DRs, control electronics. Qube all-in-one system. Never took VC. CA$23M CQCP. Dorval, Quebec."},
+{n:"IQM",s:"IQM",type:"Transmon",status:"Pre-IPO",geo:"Europe",q:54,f:99.9,fund:558,rev:35,yr:2018,note:"Europe's largest SC QC company. Aalto/VTT spinoff. 21 systems at 13 customers. >99.9% fidelity. 300+ employees. SPAC at $1.8B (Feb 2026). $35M 2025 revenue."},
+{n:"OQC",s:"OQC",type:"Coaxmon",status:"Private",geo:"Europe",q:32,f:99.8,fund:100,rev:null,yr:2017,note:"UK's first commercial SC QC. Proprietary 3D Coaxmon architecture. Quantum-AI Data Centre NYC (Sept 2025). Roadmap: 200 logical qubits 2028. AWS Braket available."},
+{n:"Alice & Bob",s:"A&B",type:"Cat qubit",status:"Private",geo:"Europe",q:null,f:null,fund:130,rev:null,yr:2020,note:"€130M raised (€100M Series B Jan 2025). Cat qubits: >7 min bit-flip lifetime. Claims 100 logical qubits from 1,500 physical. ~150 employees. DARPA QBI. Paris."},
+{n:"QuantWare",s:"QuantWare",type:"Transmon QPU",status:"Private",geo:"Europe",q:64,f:null,fund:27,rev:null,yr:2021,note:"World's first commercial off-the-shelf SC QPU supplier. TU Delft spinoff. VIO-40K: 10,000+ qubit processors. Building Kilofab in Delft (2026). Supplies to Israel, Spain, Netherlands."},
+{n:"Qilimanjaro",s:"Qilimanjaro",type:"Fluxonium",status:"Private",geo:"Europe",q:20,f:null,fund:12.6,rev:null,yr:2019,note:"BSC/IFAE spinoff. Analog fluxonium (ms coherence) + digital. Hybrid Quantum Data Center Barcelona. SpeQtrum QaaS. CERN collab. SUPREME consortium. Spain."},
+{n:"Peak Quantum",s:"Peak Q",type:"Protected SC",status:"Private",geo:"Europe",q:null,f:null,fund:null,rev:null,yr:2024,note:"TUM/Walther-Meissner spinoff (2024). Inherently error-protected SC qubits. Will operate one of three SUPREME fabrication sites. Munich Quantum Valley. Very early stage."},
+{n:"Origin Quantum",s:"Origin",type:"Transmon",status:"Pre-IPO",geo:"China",q:72,f:null,fund:null,rev:null,yr:2017,note:"China's leading SC QC. USTC spinoff. 72-qubit Wukong. 30M+ cloud visits. Full vertical integration. ~$950M implied valuation. On US Entity List. Hefei."},
+{n:"China Telecom Quantum",s:"CT Quantum",type:"Transmon",status:"Corporate",geo:"China",q:880,f:null,fund:null,rev:null,yr:2023,note:"SOE subsidiary of China Telecom. Tianyan cloud: 37M+ visits. 880-qubit SC cluster. CNY 10B+ investment. Controls QuantumCTek since Jan 2025. Hefei."},
+{n:"QuantumCTek",s:"QCTek",type:"Transmon",status:"Public",geo:"China",q:504,f:null,fund:null,rev:null,yr:2009,note:"USTC spinoff. 504-qubit Xiaohong chip. Tianyan-504 and Tianyan-287 systems. STAR Market listed (688027). Controlled by China Telecom since Jan 2025. Hefei."},
+{n:"SpinQ Technology",s:"SpinQ",type:"Transmon",status:"Private",geo:"China",q:null,f:null,fund:null,rev:null,yr:2018,note:"First Chinese firm to export SC quantum chips. Products in 200+ institutions across 40+ countries. ~CNY 1B Series C. Pre-IPO. Shenzhen."},
+{n:"LogicBit",s:"LogicBit",type:"Transmon",status:"Private",geo:"China",q:100,f:null,fund:null,rev:null,yr:2021,note:"Zhejiang University spinoff. Focus on QEC and logical qubits. 100-qubit chip in Nature (Aug 2025). JanusQ Cloud platform. Hangzhou."},
+{n:"BAQIS",s:"BAQIS",type:"Transmon",status:"Corporate",geo:"China",q:null,f:null,fund:null,rev:null,yr:2017,note:"Beijing Quantum Information Science Research Institute. Operates Quafu cloud platform. Received Baidu's lab/equipment (Jan 2024). Gov't-backed. Beijing."},
+{n:"Coherent Tech.",s:"Coherent",type:"Transmon",status:"Private",geo:"China",q:null,f:null,fund:null,rev:null,yr:2021,note:"Beijing SC QC startup. Limited public information. Early stage."},
+{n:"Alibaba DAMO",s:"Alibaba",type:"Fluxonium",status:"Defunct",geo:"China",q:null,f:99.72,fund:null,rev:null,yr:2015,def:true,note:"World-class fluxonium: 99.72% 2Q gate fidelity. Lab shut Nov 2023. Equipment donated to Zhejiang University. AI pivot + budget restructuring."},
+{n:"Baidu Quantum",s:"Baidu",type:"Transmon",status:"Defunct",geo:"China",q:36,f:null,fund:null,rev:null,yr:2018,def:true,note:"36-qubit Qian Shi processor. Lab donated to BAQIS Jan 2024. AI pivot + US export controls. Talent remains in Chinese ecosystem."},
+{n:"Fujitsu / RIKEN",s:"Fujitsu",type:"Transmon",status:"Corporate",geo:"Japan",q:256,f:null,fund:null,rev:null,yr:2021,note:"256-qubit SC QC (April 2025). Sold first commercial SC QC to AIST. 1,000-qubit target 2026; 10,000+ by 2030 (STAR architecture). Japan's leading corporate SC player."},
+{n:"NEC",s:"NEC",type:"Parametron",status:"Corporate",geo:"Japan",q:null,f:null,fund:null,rev:null,yr:1999,note:"Pioneered world's first SC qubit operation (1999). Now focused on superconducting parametron (JPO) for annealing via ParityQC. Contributing to gate-based SC QC under MOONSHOT."},
+{n:"NTT",s:"NTT",type:"Transmon",status:"Corporate",geo:"Japan",q:null,f:null,fund:null,rev:null,yr:2015,note:"Partner in RIKEN consortium. Dedicated SC Quantum Circuits Research Group at NTT Basic Research Labs. Contributing to Japan's domestic SC supply chain."},
+{n:"RIKEN RQC",s:"RIKEN",type:"Transmon",status:"Corporate",geo:"Japan",q:256,f:null,fund:null,rev:null,yr:2020,note:"Led by Yasunobu Nakamura (SC qubit pioneer). Japan's first domestically made SC QC (64→256 qubits with Fujitsu). Cloud access for research. Core Q-LEAP institution."},
+{n:"SDT Inc.",s:"SDT",type:"Transmon",status:"Private",geo:"S.Korea",q:20,f:null,fund:null,rev:null,yr:2015,note:"Korea's primary SC QC startup. 20-qubit Kreo. Targeting 64-qubit H1 2026. Integrated with NVIDIA DGX B200. Korea's first commercial QC facility. $2.3B national strategy."},
+{n:"Norma Inc.",s:"Norma",type:"Transmon",status:"Private",geo:"S.Korea",q:10,f:null,fund:18,rev:null,yr:2011,note:"Developing Qrion SC QC (10+ qubits). $18M export contract with Saudi Arabia. Partnerships with Rigetti, IQM, Maybell Quantum. Seoul."},
+{n:"QuamCore",s:"QuamCore",type:"Transmon",status:"Private",geo:"Israel",q:null,f:null,fund:35,rev:null,yr:2022,note:"Weizmann/Technion spinoff. Stealth exit March 2025. $35M raised. Claims 1M qubits in single cryostat by reducing cabling 1,000x. Chips entering fab. CEO: Alon Cohen (ex-Mobileye)."},
+{n:"IAI",s:"IAI",type:"Transmon",status:"Corporate",geo:"Israel",q:20,f:null,fund:null,rev:null,yr:2022,note:"Israel Aerospace Industries. Built Israel's first 20-qubit SC QC (Dec 2024). Quantum QHIPU lab with Hebrew University. Defense + civilian applications."},
+{n:"QpiAI",s:"QpiAI",type:"Transmon",status:"Private",geo:"India",q:64,f:null,fund:32,rev:null,yr:2019,note:"India's first full-stack 25-qubit SC QC (April 2025). 64-qubit Kaveri chip. $32M Series A. Roadmap: 100 logical qubits by 2030. National Quantum Mission. Bengaluru."},
+{n:"Rosatom / JV Kvant",s:"Rosatom",type:"Transmon",status:"Corporate",geo:"Other",q:16,f:null,fund:790,rev:null,yr:2020,note:"Russia's national QC coordinator. 16-qubit SC processor (Dec 2025). National Quantum Laboratory. ~$790M gov't initiative. Moscow."},
+{n:"TII (UAE)",s:"TII",type:"Transmon",status:"Corporate",geo:"Other",q:25,f:null,fund:null,rev:null,yr:2020,note:"Technology Innovation Institute, Abu Dhabi. First SC qubit in MENA region (~2022). 5-25 qubit systems. Cloud QPU access Feb 2026. Uses Qibo framework."},
+{n:"Anyon Tech. (SG)",s:"Anyon SG",type:"Transmon",status:"Private",geo:"Other",q:null,f:null,fund:null,rev:null,yr:2021,note:"Singapore. Roots in A*STAR, Caltech, UC Berkeley. SC processors + on-chip controls + quantum networking. CUDA-Q integration. Partnership with YQuantum."},
+{n:"Academia Sinica",s:"Academia",type:"Transmon",status:"Corporate",geo:"Other",q:5,f:null,fund:null,rev:null,yr:2020,note:"Taiwan's first 5-qubit SC QC. R&D and talent training. TSRI acquired IQM Spark (first full-stack SC QC in Taiwan, 2025). Taipei."},
+{n:"AQC (Australia)",s:"AQC",type:"SC circulators",status:"Private",geo:"Other",q:null,f:null,fund:3,rev:null,yr:2020,note:"Analog Quantum Circuits, U. of Queensland spinoff. SC microwave circulators 1,000x smaller than commercial — enabling component for SC QC scaling. $3M Uniseed. Brisbane."},
+];
+
+const sC={Hyperscaler:"#6d5ffa",Corporate:"#9d8df5",Public:"#2ecc8f","Pre-IPO":"#f0a500",Private:"#4da8f5",Acquired:"#2d3142",Defunct:"#e74c3c"};
+const gC={US:"#6d5ffa",Canada:"#4da8f5",Europe:"#2ecc8f",Japan:"#f0a500","S.Korea":"#f472b6",Israel:"#34d399",India:"#fb923c",China:"#e74c3c",Other:"#a78bfa"};
+const tC={"Transmon":"#6d5ffa","Cat qubit":"#f0a500","Fluxonium":"#2ecc8f","Dual-rail":"#4da8f5","Annealing":"#f87171","Coaxmon":"#a78bfa","SFQ":"#34d399","Bosonic GKP":"#fb923c","Wafer-scale SC":"#e879f9","Transmon QPU":"#818cf8","App-specific SC":"#fbbf24","Fluxonium":"#2ecc8f","Parametron":"#38bdf8","Topological SC":"#c084fc","Protected SC":"#f472b6","SC circulators":"#94a3b8"};
+
+let cCluster="geo",cSize="equal",cFilter="all";
+let sim,nodes;
+const W=()=>document.querySelector(".ca").clientWidth,H=660;
+
+const geoPos={US:{x:.17,y:.38},Canada:{x:.17,y:.75},Europe:{x:.5,y:.28},Japan:{x:.82,y:.22},"S.Korea":{x:.88,y:.52},Israel:{x:.62,y:.75},India:{x:.72,y:.88},China:{x:.75,y:.62},Other:{x:.38,y:.8}};
+const statPos={Hyperscaler:{x:.14,y:.22},Corporate:{x:.14,y:.65},Public:{x:.42,y:.2},"Pre-IPO":{x:.64,y:.15},Private:{x:.62,y:.58},Acquired:{x:.85,y:.28},Defunct:{x:.85,y:.7}};
+
+function col(d){
+  if(d.def)return sC.Defunct;
+  if(d.acq)return sC.Acquired;
+  if(cCluster==="status")return sC[d.status]||"#888";
+  if(cCluster==="type")return tC[d.type]||"#6d5ffa";
+  return gC[d.geo]||"#6d5ffa";
+}
+function getR(d){
+  const b=12;
+  if(cSize==="equal")return b+4;
+  if(cSize==="qubits"&&d.q)return b+Math.pow(d.q/4400,.4)*24;
+  if(cSize==="funding"&&d.fund)return b+Math.pow(d.fund/558,.4)*22;
+  if(cSize==="fidelity"&&d.f)return b+(d.f-99)*10;
+  return b;
+}
+function ctr(d){
+  const w=W(),h=H;
+  if(cCluster==="geo"){const p=geoPos[d.geo]||{x:.5,y:.5};return{x:p.x*w,y:p.y*h};}
+  if(cCluster==="status"){const k=d.def?"Defunct":d.acq?"Acquired":d.status;const p=statPos[k]||{x:.5,y:.5};return{x:p.x*w,y:p.y*h};}
+  if(cCluster==="type"){const types=[...new Set(D.map(c=>c.type))];const i=types.indexOf(d.type);const col_=i%3,row=Math.floor(i/3);return{x:w*(.18+col_*.32),y:h*(.2+row*.28)};}
+  return{x:w/2,y:h/2};
+}
+function buildLabels(svg){
+  svg.selectAll(".clbl").remove();
+  svg.selectAll(".clbl-bg").remove();
+  if(cCluster==="none"||!nodes||!nodes.length)return;
+  const groups={};
+  nodes.forEach(d=>{
+    let key;
+    if(cCluster==="geo")key=d.geo;
+    else if(cCluster==="status")key=d.def?"Defunct":d.acq?"Acquired":d.status;
+    else if(cCluster==="type")key=d.type;
+    if(!key)return;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(d);
+  });
+  const w=W(),h=H;
+  Object.entries(groups).forEach(([key,group])=>{
+    if(!group.length)return;
+    const minX=Math.min(...group.map(d=>d.x-d.r));
+    const maxX=Math.max(...group.map(d=>d.x+d.r));
+    const minY=Math.min(...group.map(d=>d.y-d.r));
+    const cx=(minX+maxX)/2;
+    const ly=Math.max(16,minY-14);
+    let c;
+    if(cCluster==="geo")c=gC[key]||"#888";
+    else if(cCluster==="status")c=sC[key]||"#888";
+    else c=tC[key]||"#6d5ffa";
+    const label=key.length>18?key.slice(0,17)+"\u2026":key;
+    const tw=label.length*5.2+20;
+    const lx=Math.max(tw/2+4,Math.min(w-tw/2-4,cx));
+    svg.append("rect").attr("class","clbl-bg")
+      .attr("x",lx-tw/2).attr("y",ly-11)
+      .attr("width",tw).attr("height",13).attr("rx",2)
+      .attr("fill","#08080e").attr("stroke",c).attr("stroke-opacity",.55).attr("stroke-width",.75);
+    svg.append("text").attr("class","clbl")
+      .attr("x",lx).attr("y",ly).attr("text-anchor","middle")
+      .attr("fill",c).attr("fill-opacity",.95)
+      .attr("font-size","7.5px").attr("letter-spacing","0.12em")
+      .text(label.toUpperCase());
+  });
+}
+
+
+function buildLeg(){
+  const leg=document.getElementById("leg");
+  leg.innerHTML="";
+  let pairs=[];
+  if(cCluster==="status"){
+    pairs=Object.entries(sC).map(([l,c])=>({l,c}));
+  } else if(cCluster==="type"){
+    const seen=new Set();
+    D.forEach(d=>{
+      if(!seen.has(d.type)){seen.add(d.type);pairs.push({l:d.type,c:tC[d.type]||"#6d5ffa"});}
+    });
+  } else {
+    pairs=Object.entries(gC).map(([l,c])=>({l,c}));
+  }
+  pairs.forEach(({l,c})=>{
+    const el=document.createElement("div");
+    el.className="li";
+    el.innerHTML=`<div class="ld" style="background:${c}"></div>${l}`;
+    leg.appendChild(el);
+  });
+}
+function getVisible(){
+  if(cFilter==="all")return D;
+  if(cFilter==="active")return D.filter(d=>!d.acq&&!d.def);
+  if(cFilter==="Europe")return D.filter(d=>d.geo==="Europe");
+  return D.filter(d=>d.geo===cFilter);
+}
+function init(){
+  const svg=d3.select("#sv");svg.selectAll("*").remove();
+  const w=W();
+  const vis=getVisible();
+  const data=vis.map((d,i)=>({...d,id:i,x:w/2+(Math.random()-.5)*160,y:H/2+(Math.random()-.5)*160,r:getR(d)}));
+  buildLabels(svg);
+  const g=svg.selectAll(".node").data(data).enter().append("g")
+    .attr("class",d=>`node${(d.acq||d.def)?" faded":""}`)
+    .attr("transform",d=>`translate(${d.x},${d.y})`);
+  g.append("circle").attr("r",d=>d.r)
+    .attr("fill",d=>col(d)).attr("fill-opacity",.12)
+    .attr("stroke",d=>col(d)).attr("stroke-width",d=>(d.acq||d.def)?1:1.5)
+    .attr("stroke-opacity",.85);
+  g.append("text").attr("text-anchor","middle").attr("dy","-.1em")
+    .attr("fill",d=>(d.acq||d.def)?"#374151":col(d))
+    .attr("font-size",d=>d.r>20?"10px":"9px").attr("font-weight","500").text(d=>d.s);
+  g.append("text").attr("text-anchor","middle").attr("dy","1em")
+    .attr("fill","rgba(232,232,242,.28)").attr("font-size","7.5px").text(d=>d.geo);
+  const tip=document.getElementById("tip");
+  g.on("mouseover",function(ev,d){
+    const c=d.def?sC.Defunct:d.acq?sC.Acquired:(sC[d.status]||"#888");
+    const lbl=d.def?"DEFUNCT":d.acq?`→ ${d.acqBy} (${d.acqY})`:(d.status.toUpperCase());
+    const rows=[{k:"Qubit type",v:d.type},{k:"Qubits",v:d.q?d.q.toLocaleString():"—"},{k:"2Q fidelity",v:d.f?d.f+"%":"—"},{k:"Revenue",v:d.rev?"$"+d.rev+"M":"—"},{k:"Funding",v:d.fund?"$"+d.fund+"M":"—"},{k:"Founded",v:d.yr},{k:"Region",v:d.geo},{k:"Status",v:lbl}].filter(r=>r.v&&r.v!=="—");
+    tip.innerHTML=`<div class="tn">${d.n}<span class="tb" style="background:${c}22;color:${c};border:1px solid ${c}44">${lbl}</span></div>${rows.map(r=>`<div class="tr"><span class="tk">${r.k}</span><span class="tv">${r.v}</span></div>`).join("")}<div class="tnote">${d.note||""}</div>`;
+    tip.classList.add("on");
+    const rect=document.querySelector(".ca").getBoundingClientRect();
+    let tx=ev.clientX-rect.left+14,ty=ev.clientY-rect.top-8;
+    if(tx+265>rect.width)tx=ev.clientX-rect.left-268;
+    if(ty+310>H)ty=ty-280;
+    tip.style.left=tx+"px";tip.style.top=ty+"px";
+  }).on("mousemove",function(ev){
+    const rect=document.querySelector(".ca").getBoundingClientRect();
+    let tx=ev.clientX-rect.left+14,ty=ev.clientY-rect.top-8;
+    if(tx+265>rect.width)tx=ev.clientX-rect.left-268;
+    if(ty+310>H)ty=ty-280;
+    tip.style.left=tx+"px";tip.style.top=ty+"px";
+  }).on("mouseout",()=>tip.classList.remove("on"));
+  nodes=data;
+  sim=d3.forceSimulation(data).alphaDecay(0.04)
+    .force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8))
+    .force("x",d3.forceX(d=>ctr(d).x).strength(.09))
+    .force("y",d3.forceY(d=>ctr(d).y).strength(.09))
+    .on("tick",()=>{svg.selectAll(".node").attr("transform",d=>`translate(${Math.max(d.r,Math.min(w-d.r,d.x))},${Math.max(d.r,Math.min(H-d.r,d.y))})`);})
+  .on("end",()=>{buildLabels(d3.select("#sv"));});
+  buildLeg();
+}
+function setC(m,btn){
+  cCluster=m;
+  document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["geo","status","type","none"].some(x=>b.getAttribute("onclick")?.includes(`'${x}'`)))b.classList.remove("on");});
+  btn.classList.add("on");
+  d3.select("#sv").selectAll(".clbl").remove();d3.select("#sv").selectAll(".clbl-bg").remove();
+  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});const svg=d3.select("#sv");svg.selectAll(".node circle").attr("fill",d=>col(d)).attr("stroke",d=>col(d));svg.selectAll(".node text:first-of-type").attr("fill",d=>(d.acq||d.def)?"#374151":col(d));sim.force("x",d3.forceX(d=>ctr(d).x).strength(.12)).force("y",d3.forceY(d=>ctr(d).y).strength(.12)).force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8)).alpha(.9).restart();}
+  buildLeg();
+}
+function setS(v){
+  cSize=v;
+  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});d3.select("#sv").selectAll(".node circle").transition().duration(350).attr("r",d=>d.r);sim.force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8)).alpha(.5).restart();}
+}
+function setF(f,btn){
+  cFilter=f;
+  document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["all","active","US","China","Europe"].some(x=>b.getAttribute("onclick")?.includes(`'${x}'`)))b.classList.remove("on");});
+  btn.classList.add("on");init();
+}
+window.addEventListener("resize",()=>init());
+init();
+</script>
+</body>
+</html>
