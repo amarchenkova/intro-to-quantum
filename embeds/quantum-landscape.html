@@ -37,8 +37,8 @@ select{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:4px 8px;bo
 .node{cursor:pointer;}
 .node circle{transition:filter .12s;}
 .node:hover circle{filter:brightness(1.5);}
-.node.faded circle{opacity:.22;stroke-dasharray:3,2;}
-.node.faded text{opacity:.28;}
+.node.faded circle{opacity:.5;stroke-dasharray:3,2;}
+.node.faded text{opacity:.75;}
 .clbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;fill:rgba(255,255,255,.9);pointer-events:none;}
 .tip{position:absolute;background:#10101b;border:1px solid rgba(255,255,255,.11);border-radius:5px;padding:10px 12px;pointer-events:none;opacity:0;transition:opacity .1s;max-width:255px;z-index:99;font-size:9px;box-shadow:0 10px 36px rgba(0,0,0,.7);}
 .tip.on{opacity:1;}
@@ -266,7 +266,7 @@ function init(){
     .attr("stroke",d=>col(d)).attr("stroke-width",d=>(d.acq||d.def)?1:1.5)
     .attr("stroke-opacity",.85);
   g.append("text").attr("text-anchor","middle").attr("dy","-.1em")
-    .attr("fill",d=>(d.acq||d.def)?"#6b7280":col(d))
+    .attr("fill",d=>(d.acq||d.def)?"#9ca3af":col(d))
     .attr("font-size",d=>d.r>20?"11px":"10px").attr("font-weight","500").text(d=>d.s);
   g.append("text").attr("text-anchor","middle").attr("dy","1.1em")
     .attr("fill","rgba(232,232,242,.55)").attr("font-size","9px").text(d=>d.geo);
