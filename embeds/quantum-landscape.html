@@ -23,15 +23,15 @@ h1{font-family:"Syne",sans-serif;font-size:clamp(16px,2.6vw,26px);font-weight:70
 .srow{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--b0);}
 .stat{padding:.7rem 1.2rem;border-right:1px solid var(--b0);}
 .stat:last-child{border-right:none;}
-.sn{font-family:"Syne",sans-serif;font-size:16px;font-weight:700;}
-.sl{font-size:7px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;margin-top:1px;}
+.sn{font-family:"Syne",sans-serif;font-size:18px;font-weight:700;}
+.sl{font-size:9px;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;margin-top:2px;}
 .ctrl-bar{padding:.75rem 2rem;display:flex;gap:1.1rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--b0);background:var(--s1);}
-.cl{font-size:8px;letter-spacing:.12em;color:var(--mu);text-transform:uppercase;}
+.cl{font-size:10px;letter-spacing:.1em;color:var(--mu);text-transform:uppercase;}
 .bgrp{display:flex;gap:2px;flex-wrap:wrap;}
-.btn{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 8px;border:1px solid var(--b0);background:transparent;color:var(--mu);cursor:pointer;border-radius:2px;transition:all .12s;}
+.btn{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:4px 10px;border:1px solid var(--b0);background:transparent;color:var(--mu);cursor:pointer;border-radius:2px;transition:all .12s;}
 .btn:hover{border-color:var(--b1);color:var(--tx);}
 .btn.on{background:var(--ac);border-color:var(--ac);color:#fff;}
-select{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 6px;border:1px solid var(--b0);background:var(--s2);color:var(--tx);border-radius:2px;cursor:pointer;}
+select{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:4px 8px;border:1px solid var(--b0);background:var(--s2);color:var(--tx);border-radius:2px;cursor:pointer;}
 .ca{position:relative;width:100%;height:660px;background:var(--s1);}
 #sv{width:100%;height:100%;}
 .node{cursor:pointer;}
@@ -39,7 +39,7 @@ select{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 6px;borde
 .node:hover circle{filter:brightness(1.5);}
 .node.faded circle{opacity:.22;stroke-dasharray:3,2;}
 .node.faded text{opacity:.28;}
-.clbl{font-family:"IBM Plex Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;fill:rgba(255,255,255,.16);pointer-events:none;}
+.clbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;fill:rgba(255,255,255,.9);pointer-events:none;}
 .tip{position:absolute;background:#10101b;border:1px solid rgba(255,255,255,.11);border-radius:5px;padding:10px 12px;pointer-events:none;opacity:0;transition:opacity .1s;max-width:255px;z-index:99;font-size:9px;box-shadow:0 10px 36px rgba(0,0,0,.7);}
 .tip.on{opacity:1;}
 .tn{font-family:"Syne",sans-serif;font-size:11px;font-weight:700;margin-bottom:6px;line-height:1.3;}
@@ -49,10 +49,10 @@ select{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 6px;borde
 .tk{color:var(--mu);font-size:8px;}
 .tv{font-size:8px;text-align:right;}
 .tnote{margin-top:5px;font-size:8px;color:var(--mu);line-height:1.5;font-style:italic;}
-.leg{padding:.65rem 2rem;display:flex;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--b0);background:var(--s1);}
-.li{display:flex;align-items:center;gap:4px;font-size:8px;color:var(--mu);}
-.ld{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.fn{font-size:8px;color:var(--mu);padding:.5rem 2rem .9rem;opacity:.5;background:var(--s1);}
+.leg{padding:.75rem 2rem;display:flex;gap:1.1rem;flex-wrap:wrap;border-top:1px solid var(--b0);background:var(--s1);}
+.li{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--tx);opacity:.75;}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.fn{font-size:10px;color:var(--mu);padding:.6rem 2rem 1rem;opacity:.7;background:var(--s1);}
 </style>
 </head>
 <body>
@@ -67,8 +67,8 @@ select{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:3px 6px;borde
   <div class="stat"><div class="sn">15</div><div class="sl">Countries</div></div>
   <div class="stat"><div class="sn">14</div><div class="sl">US entities</div></div>
   <div class="stat"><div class="sn">10</div><div class="sl">China entities</div></div>
-  <div class="stat"><div class="sn">2</div><div class="sl">Acquired 12mo</div></div>
-  <div class="stat"><div class="sn">2</div><div class="sl">Defunct 2023-24</div></div>
+  <div class="stat"><div class="sn">2</div><div class="sl">Acquired</div></div>
+  <div class="stat"><div class="sn">2</div><div class="sl">Defunct</div></div>
   <div class="stat"><div class="sn">~70%</div><div class="sl">Use transmon</div></div>
 </div>
 <div class="ctrl-bar">
@@ -138,7 +138,7 @@ const D=[
 {n:"NEC",s:"NEC",type:"Parametron",status:"Corporate",geo:"Japan",q:null,f:null,fund:null,rev:null,yr:1999,note:"Pioneered world's first SC qubit — Cooper-pair box charge qubit, Nakamura/Pashkin/Tsai, Nature 1999. Now focused on superconducting parametron (JPO) for annealing via ParityQC. Contributing to gate-based SC QC under MOONSHOT."},
 {n:"NTT",s:"NTT",type:"Transmon",status:"Corporate",geo:"Japan",q:null,f:null,fund:null,rev:null,yr:2015,note:"Partner in RIKEN consortium. Dedicated SC Quantum Circuits Research Group at NTT Basic Research Labs. Contributing to Japan's domestic SC supply chain."},
 {n:"RIKEN RQC",s:"RIKEN",type:"Transmon",status:"Corporate",geo:"Japan",q:256,f:null,fund:null,rev:null,yr:2020,note:"Led by Yasunobu Nakamura (SC qubit pioneer). Japan's first domestically made SC QC (64→256 qubits with Fujitsu). Cloud access for research. Core Q-LEAP institution."},
-{n:"SDT Inc.",s:"SDT",type:"Transmon",status:"Private",geo:"S.Korea",q:20,f:null,fund:null,rev:null,yr:2015,note:"Korea's primary SC QC startup. 20-qubit Kreo. Targeting 64-qubit H1 2026. Integrated with NVIDIA DGX B200. Korea's first commercial QC facility. $2.3B national strategy."},
+{n:"SDT Inc.",s:"SDT",type:"Transmon",status:"Private",geo:"S.Korea",q:20,f:null,fund:null,rev:null,yr:2015,note:"Korea's primary SC QC startup. 20-qubit Kreo. Targeting 64-qubit later in 2026. Integrated with NVIDIA DGX B200. Korea's first commercial QC facility (Gangnam, Feb 2026). Part of Korea's $2.3B national quantum strategy."},
 {n:"Norma Inc.",s:"Norma",type:"Transmon",status:"Private",geo:"S.Korea",q:10,f:null,fund:18,rev:null,yr:2011,note:"Developing Qrion SC QC (10+ qubits). $18M export contract with Saudi Arabia. Partnerships with Rigetti, IQM, Maybell Quantum. Seoul."},
 {n:"QuamCore",s:"QuamCore",type:"Transmon",status:"Private",geo:"Israel",q:null,f:null,fund:35,rev:null,yr:2022,note:"Weizmann/Technion spinoff. Stealth exit March 2025. $35M raised. Claims 1M qubits in single cryostat by reducing cabling 1,000x. Chips entering fab. CEO: Alon Cohen (ex-Mobileye)."},
 {n:"IAI",s:"IAI",type:"Transmon",status:"Corporate",geo:"Israel",q:20,f:null,fund:null,rev:null,yr:2022,note:"Israel Aerospace Industries. Built Israel's first 20-qubit SC QC (Dec 2024). Quantum QHIPU lab with Hebrew University. Defense + civilian applications."},
@@ -210,16 +210,16 @@ function buildLabels(svg){
     else if(cCluster==="status")c=sC[key]||"#888";
     else c=tC[key]||"#6d5ffa";
     const label=key.length>18?key.slice(0,17)+"\u2026":key;
-    const tw=label.length*5.2+20;
+    const tw=label.length*7.3+22;
     const lx=Math.max(tw/2+4,Math.min(w-tw/2-4,cx));
     svg.append("rect").attr("class","clbl-bg")
-      .attr("x",lx-tw/2).attr("y",ly-11)
-      .attr("width",tw).attr("height",13).attr("rx",2)
-      .attr("fill","#08080e").attr("stroke",c).attr("stroke-opacity",.55).attr("stroke-width",.75);
+      .attr("x",lx-tw/2).attr("y",ly-14)
+      .attr("width",tw).attr("height",18).attr("rx",3)
+      .attr("fill","#08080e").attr("stroke",c).attr("stroke-opacity",.7).attr("stroke-width",1);
     svg.append("text").attr("class","clbl")
-      .attr("x",lx).attr("y",ly).attr("text-anchor","middle")
-      .attr("fill",c).attr("fill-opacity",.95)
-      .attr("font-size","7.5px").attr("letter-spacing","0.12em")
+      .attr("x",lx).attr("y",ly-1).attr("text-anchor","middle")
+      .attr("fill",c).attr("fill-opacity",1)
+      .attr("font-size","11px").attr("letter-spacing","0.08em").attr("font-weight","500")
       .text(label.toUpperCase());
   });
 }
@@ -266,10 +266,10 @@ function init(){
     .attr("stroke",d=>col(d)).attr("stroke-width",d=>(d.acq||d.def)?1:1.5)
     .attr("stroke-opacity",.85);
   g.append("text").attr("text-anchor","middle").attr("dy","-.1em")
-    .attr("fill",d=>(d.acq||d.def)?"#374151":col(d))
-    .attr("font-size",d=>d.r>20?"10px":"9px").attr("font-weight","500").text(d=>d.s);
-  g.append("text").attr("text-anchor","middle").attr("dy","1em")
-    .attr("fill","rgba(232,232,242,.28)").attr("font-size","7.5px").text(d=>d.geo);
+    .attr("fill",d=>(d.acq||d.def)?"#6b7280":col(d))
+    .attr("font-size",d=>d.r>20?"11px":"10px").attr("font-weight","500").text(d=>d.s);
+  g.append("text").attr("text-anchor","middle").attr("dy","1.1em")
+    .attr("fill","rgba(232,232,242,.55)").attr("font-size","9px").text(d=>d.geo);
   const tip=document.getElementById("tip");
   g.on("mouseover",function(ev,d){
     const c=d.def?sC.Defunct:d.acq?sC.Acquired:(sC[d.status]||"#888");
