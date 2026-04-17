@@ -195,11 +195,13 @@ function ctr(d){
   if(cCluster==="geo"){const p=geoPos[d.geo]||{x:.5,y:.5};return{x:p.x*w,y:p.y*h};}
   if(cCluster==="status"){const k=d.def?"Defunct":d.acq?"Acquired":d.status;const p=statPos[k]||{x:.5,y:.5};return{x:p.x*w,y:p.y*h};}
   if(cCluster==="type"){
-    if(d.type==="Transmon")return{x:w*.22,y:h*.5};
+    if(d.type==="Transmon")return{x:w*.16,y:h*.5};
     const otherTypes=[...new Set(D.filter(c=>c.type!=="Transmon").map(c=>c.type))];
     const i=otherTypes.indexOf(d.type);
-    const col=i%3,row=Math.floor(i/3);
-    return{x:w*(.58+col*.16),y:h*(.14+row*.17)};
+    const cols=4;
+    const col=i%cols,row=Math.floor(i/cols);
+    const xStart=.42,xEnd=.92,yStart=.18,yEnd=.82;
+    return{x:w*(xStart+col*(xEnd-xStart)/(cols-1)),y:h*(yStart+row*(yEnd-yStart)/3)};
   }
   return{x:w/2,y:h/2};
 }
@@ -323,11 +325,15 @@ function init(){
     tip.style.left=tx+"px";tip.style.top=ty+"px";
   }).on("mouseout",()=>tip.classList.remove("on"));
   nodes=data;
+  let tickN=0;
   sim=d3.forceSimulation(data).alphaDecay(0.04)
     .force("c",d3.forceCollide(d=>d.r+13).strength(1).iterations(8))
     .force("x",d3.forceX(d=>ctr(d).x).strength(.14))
     .force("y",d3.forceY(d=>ctr(d).y).strength(.14))
-    .on("tick",()=>{svg.selectAll(".node").attr("transform",d=>`translate(${Math.max(d.r,Math.min(w-d.r,d.x))},${Math.max(d.r,Math.min(H-d.r,d.y))})`);})
+    .on("tick",()=>{
+      svg.selectAll(".node").attr("transform",d=>`translate(${Math.max(d.r,Math.min(w-d.r,d.x))},${Math.max(d.r,Math.min(H-d.r,d.y))})`);
+      if(++tickN%6===0)buildLabels(svg);
+    })
   .on("end",()=>{buildLabels(d3.select("#sv"));});
   buildLeg();
 }
