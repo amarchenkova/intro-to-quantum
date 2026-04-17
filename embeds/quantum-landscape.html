@@ -97,6 +97,14 @@ select{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:4px 8px;bo
       <button class="btn" onclick="setF('Europe',this)">Europe</button>
     </div>
   </div>
+  <div style="display:flex;align-items:center;gap:6px"><span class="cl">Founded</span>
+    <div class="bgrp">
+      <button class="btn on" onclick="setY('any',this)">Any</button>
+      <button class="btn" onclick="setY('pre15',this)">Pre-2015</button>
+      <button class="btn" onclick="setY('1519',this)">2015–19</button>
+      <button class="btn" onclick="setY('20plus',this)">2020+</button>
+    </div>
+  </div>
 </div>
 <div class="ca"><svg id="sv"></svg><div class="tip" id="tip"></div></div>
 <div class="leg" id="leg"></div>
@@ -154,7 +162,7 @@ const sC={Hyperscaler:"#6d5ffa",Corporate:"#9d8df5",Public:"#2ecc8f","Pre-IPO":"
 const gC={US:"#6d5ffa",Canada:"#4da8f5",Europe:"#2ecc8f",Japan:"#f0a500","S.Korea":"#f472b6",Israel:"#14b8a6",India:"#fb923c",China:"#e74c3c",Russia:"#a78bfa",UAE:"#fbbf24",Singapore:"#38bdf8",Taiwan:"#c084fc",Australia:"#94a3b8",Other:"#9ca3af"};
 const tC={"Transmon":"#6d5ffa","Cat qubit":"#f0a500","Fluxonium":"#2ecc8f","Dual-rail":"#4da8f5","Annealing":"#f87171","Coaxmon":"#a78bfa","SFQ":"#34d399","Bosonic GKP":"#fb923c","Wafer-scale SC":"#e879f9","Transmon QPU":"#818cf8","App-specific SC":"#fbbf24","Fluxonium":"#2ecc8f","Parametron":"#38bdf8","Topological SC":"#c084fc","Protected SC":"#f472b6","SC circulators":"#94a3b8"};
 
-let cCluster="geo",cSize="equal",cFilter="all";
+let cCluster="geo",cSize="equal",cFilter="all",cYear="any";
 let sim,nodes;
 const W=()=>document.querySelector(".ca").clientWidth,H=720;
 
@@ -269,16 +277,22 @@ function buildLeg(){
   });
 }
 function getVisible(){
-  if(cFilter==="all")return D;
-  if(cFilter==="active")return D.filter(d=>!d.acq&&!d.def);
-  if(cFilter==="Europe")return D.filter(d=>d.geo==="Europe");
-  return D.filter(d=>d.geo===cFilter);
+  let r=D;
+  if(cFilter==="active")r=r.filter(d=>!d.acq&&!d.def);
+  else if(cFilter==="Europe")r=r.filter(d=>d.geo==="Europe");
+  else if(cFilter!=="all")r=r.filter(d=>d.geo===cFilter);
+  if(cYear==="pre15")r=r.filter(d=>d.yr&&d.yr<2015);
+  else if(cYear==="1519")r=r.filter(d=>d.yr&&d.yr>=2015&&d.yr<=2019);
+  else if(cYear==="20plus")r=r.filter(d=>d.yr&&d.yr>=2020);
+  return r;
 }
 function init(){
   const svg=d3.select("#sv");svg.selectAll("*").remove();
   const w=W();
   const vis=getVisible();
   const data=vis.map((d,i)=>({...d,id:i,x:w/2+(Math.random()-.5)*160,y:H/2+(Math.random()-.5)*160,r:getR(d)}));
+  data.forEach(d=>{const c=ctr(d);d.x=c.x+(Math.random()-.5)*40;d.y=c.y+(Math.random()-.5)*40;});
+  nodes=data;
   buildLabels(svg);
   const g=svg.selectAll(".node").data(data).enter().append("g")
     .attr("class",d=>`node${(d.acq||d.def)?" faded":""}`)
@@ -351,7 +365,12 @@ function setS(v){
 }
 function setF(f,btn){
   cFilter=f;
-  document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["all","active","US","China","Europe"].some(x=>b.getAttribute("onclick")?.includes(`'${x}'`)))b.classList.remove("on");});
+  document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["all","active","US","China","Europe"].some(x=>b.getAttribute("onclick")?.includes(`setF('${x}'`)))b.classList.remove("on");});
+  btn.classList.add("on");init();
+}
+function setY(y,btn){
+  cYear=y;
+  document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["any","pre15","1519","20plus"].some(x=>b.getAttribute("onclick")?.includes(`setY('${x}'`)))b.classList.remove("on");});
   btn.classList.add("on");init();
 }
 window.addEventListener("resize",()=>init());
