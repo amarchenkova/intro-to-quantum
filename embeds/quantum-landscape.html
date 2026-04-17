@@ -265,11 +265,24 @@ function init(){
     .attr("fill",d=>col(d)).attr("fill-opacity",.12)
     .attr("stroke",d=>col(d)).attr("stroke-width",d=>(d.acq||d.def)?1:1.5)
     .attr("stroke-opacity",.85);
-  g.append("text").attr("text-anchor","middle").attr("dy","-.1em")
+  g.append("text").attr("text-anchor","middle").attr("dy",".35em")
     .attr("fill",d=>(d.acq||d.def)?"#9ca3af":col(d))
-    .attr("font-size",d=>d.r>20?"11px":"10px").attr("font-weight","500").text(d=>d.s);
-  g.append("text").attr("text-anchor","middle").attr("dy","1.1em")
-    .attr("fill","rgba(232,232,242,.55)").attr("font-size","9px").text(d=>d.geo);
+    .attr("font-weight","500")
+    .each(function(d){
+      const maxW=d.r*1.85-4;
+      const charW=0.58;
+      let font=d.r>24?12:(d.r>18?11:10);
+      let txt=d.s;
+      while(font>8&&txt.length*font*charW>maxW)font-=0.5;
+      if(txt.length*font*charW>maxW){
+        const maxChars=Math.max(2,Math.floor(maxW/(font*charW))-1);
+        txt=txt.slice(0,maxChars)+"\u2026";
+      }
+      d3.select(this).attr("font-size",font+"px").text(txt);
+    });
+  g.append("text").attr("text-anchor","middle")
+    .attr("y",d=>d.r+11)
+    .attr("fill","rgba(232,232,242,.5)").attr("font-size","9px").text(d=>d.geo);
   const tip=document.getElementById("tip");
   g.on("mouseover",function(ev,d){
     const c=d.def?sC.Defunct:d.acq?sC.Acquired:(sC[d.status]||"#888");
@@ -291,7 +304,7 @@ function init(){
   }).on("mouseout",()=>tip.classList.remove("on"));
   nodes=data;
   sim=d3.forceSimulation(data).alphaDecay(0.04)
-    .force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8))
+    .force("c",d3.forceCollide(d=>d.r+15).strength(1).iterations(8))
     .force("x",d3.forceX(d=>ctr(d).x).strength(.09))
     .force("y",d3.forceY(d=>ctr(d).y).strength(.09))
     .on("tick",()=>{svg.selectAll(".node").attr("transform",d=>`translate(${Math.max(d.r,Math.min(w-d.r,d.x))},${Math.max(d.r,Math.min(H-d.r,d.y))})`);})
@@ -303,12 +316,12 @@ function setC(m,btn){
   document.querySelectorAll(".bgrp .btn").forEach(b=>{if(["geo","status","type","none"].some(x=>b.getAttribute("onclick")?.includes(`'${x}'`)))b.classList.remove("on");});
   btn.classList.add("on");
   d3.select("#sv").selectAll(".clbl").remove();d3.select("#sv").selectAll(".clbl-bg").remove();
-  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});const svg=d3.select("#sv");svg.selectAll(".node circle").attr("fill",d=>col(d)).attr("stroke",d=>col(d));svg.selectAll(".node text:first-of-type").attr("fill",d=>(d.acq||d.def)?"#374151":col(d));sim.force("x",d3.forceX(d=>ctr(d).x).strength(.12)).force("y",d3.forceY(d=>ctr(d).y).strength(.12)).force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8)).alpha(.9).restart();}
+  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});const svg=d3.select("#sv");svg.selectAll(".node circle").attr("fill",d=>col(d)).attr("stroke",d=>col(d));svg.selectAll(".node text:first-of-type").attr("fill",d=>(d.acq||d.def)?"#9ca3af":col(d));sim.force("x",d3.forceX(d=>ctr(d).x).strength(.12)).force("y",d3.forceY(d=>ctr(d).y).strength(.12)).force("c",d3.forceCollide(d=>d.r+15).strength(1).iterations(8)).alpha(.9).restart();}
   buildLeg();
 }
 function setS(v){
   cSize=v;
-  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});d3.select("#sv").selectAll(".node circle").transition().duration(350).attr("r",d=>d.r);sim.force("c",d3.forceCollide(d=>d.r+9).strength(1).iterations(8)).alpha(.5).restart();}
+  if(sim&&nodes){nodes.forEach(d=>{d.r=getR(d);});d3.select("#sv").selectAll(".node circle").transition().duration(350).attr("r",d=>d.r);sim.force("c",d3.forceCollide(d=>d.r+15).strength(1).iterations(8)).alpha(.5).restart();}
 }
 function setF(f,btn){
   cFilter=f;
