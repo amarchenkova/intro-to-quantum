@@ -18,6 +18,8 @@ body{background:var(--bg);font-family:"IBM Plex Mono",monospace;color:var(--tx);
 .wrap{max-width:1180px;margin:0 auto;}
 header{padding:1.75rem 2rem 1.25rem;border-bottom:1px solid var(--b0);}
 .brand{font-size:9px;letter-spacing:.18em;color:var(--ac);text-transform:uppercase;margin-bottom:5px;}
+.brand a{color:var(--ac);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .12s;}
+.brand a:hover{border-bottom-color:var(--ac);}
 h1{font-family:"Syne",sans-serif;font-size:clamp(16px,2.6vw,26px);font-weight:700;letter-spacing:-.02em;margin-bottom:4px;}
 .sub{font-size:10px;color:var(--mu);line-height:1.6;max-width:660px;}
 .srow{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--b0);}
@@ -58,7 +60,7 @@ select{font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:4px 8px;bo
 <body>
 <div class="wrap">
 <header>
-  <div class="brand">Quantum Frontier Substack &middot; Anastasia Marchenkova @amarchenkova &middot; April 2026</div>
+  <div class="brand"><a href="https://quantumfrontier.substack.com/" target="_blank" rel="noopener">Quantum Frontier Substack</a> &middot; Anastasia Marchenkova @amarchenkova &middot; April 2026</div>
   <h1>Every Superconducting Quantum Company in the World, 2026</h1>
   <div class="sub">45 companies and government entities across 18 countries. Hover any node for full detail. Cluster, filter, and resize by any dimension.</div>
 </header>
