@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Neutral-Atom Quantum Computer • Quantum Frontier Substack (Anastasia Marchenkova)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ==================================================================
+         TOP HEADER BAR: BRAND, 5-SCALE ZOOM NAV, SPECIES PRESETS & PAPERS
+         ================================================================== -->
+    <header class="top-header">
+      <div class="brand-block">
+        <a href="https://introtoquantum.com" style="text-decoration:none;"><div class="brand-icon">Ψ</div></a>
+        <div>
+          <div class="brand-title">
+            3D Neutral-Atom Processor <span class="brand-badge">FT-ZONED 2026</span>
+          </div>
+          <div class="brand-subtitle">Quantum Frontier Substack &middot; Anastasia Marchenkova @amarchenkova</div>
+        </div>
+      </div>
+
+      <!-- 5-Order-of-Magnitude Scale Bookmarks -->
+      <nav class="scale-nav" id="scale-nav" aria-label="Zoom Scale Bookmarks">
+        <!-- Populated by app.js -->
+      </nav>
+
+      <div class="header-actions">
+        <select id="species-preset-select" class="preset-select" title="Select Atomic Species & Architecture Mode">
+          <option value="dual-alkali">⁸⁷Rb + ¹³³Cs Dual-Species Zoned (Harvard/UChicago)</option>
+          <option value="yb171-erasure">¹⁷¹Yb Nuclear Spin + Erasure (Atom Comp/Microsoft)</option>
+          <option value="cs133-ultrascale">¹³³Cs 6,100-Qubit Ultra-Scale (Caltech Endres 2025)</option>
+        </select>
+        <button id="btn-open-papers" class="action-btn">
+          <span>📚</span> 2023–2026 Papers
+        </button>
+        <a href="https://quantumfrontier.substack.com/" target="_blank" rel="noopener" class="action-btn primary" style="text-decoration:none;">
+          Subscribe &rarr;
+        </a>
+      </div>
+    </header>
+
+    <!-- ==================================================================
+         LEFT SIDEBAR: HIERARCHICAL COMPONENT TREE & CAD/LASER CONTROLS
+         ================================================================== -->
+    <aside class="left-panel">
+      <div class="panel-section-header">
+        <span>3D Component Hierarchy (17)</span>
+        <button id="btn-show-all" class="action-btn" style="padding:2px 7px; font-size:10px;">Reset Isolation</button>
+      </div>
+
+      <div class="search-box-wrap">
+        <input type="text" id="component-search" class="search-input" placeholder="Search components, zones, optics (e.g. AOD, SLM, Rydberg)..." />
+      </div>
+
+      <div class="component-tree" id="component-tree">
+        <!-- Populated dynamically from window.AETHER_DATA.components -->
+      </div>
+
+      <!-- CAD Cutaway, Exploded View & Optical Ray Toggles -->
+      <div class="cad-controls">
+        <div class="control-row">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:600;">
+            <input type="checkbox" id="toggle-cutaway" checked />
+            Mu-Metal Shielding Cutaway
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:600;">
+            <input type="checkbox" id="toggle-labels" checked />
+            3D Labels
+          </label>
+        </div>
+
+        <div class="slider-wrap">
+          <div class="control-row">
+            <span style="color:var(--text-muted);">Exploded Assembly View</span>
+            <span id="exploded-val" style="font-family:var(--font-mono); color:var(--accent-cyan);">0%</span>
+          </div>
+          <input type="range" id="slider-exploded" min="0" max="100" value="0" />
+        </div>
+
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--accent-cyan); margin-top:2px;">
+          Optical Laser & Trap Layers
+        </div>
+        <div class="layer-grid">
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="slm" checked />
+            <span class="layer-dot" style="background:#f43f5e;"></span> SLM Static
+          </label>
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="aod" checked />
+            <span class="layer-dot" style="background:#f59e0b;"></span> 2D AOD Shuttle
+          </label>
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="rydberg" checked />
+            <span class="layer-dot" style="background:#00e5ff;"></span> Rydberg 480/780
+          </label>
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="conveyor" checked />
+            <span class="layer-dot" style="background:#10b981;"></span> Lattice Conveyor
+          </label>
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="mot" checked />
+            <span class="layer-dot" style="background:#ec4899;"></span> 2D/3D MOT Beams
+          </label>
+          <label class="layer-toggle">
+            <input type="checkbox" data-layer="readout" checked />
+            <span class="layer-dot" style="background:#a855f7;"></span> Readout Cone
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================================================================
+         CENTER 3D VIEWPORT: THREE.JS SCENE, TELEMETRY HUD & QEC CYCLE BAR
+         ================================================================== -->
+    <main class="viewport-area">
+      <div id="canvas-container"></div>
+      <div id="labels-container"></div>
+
+      <!-- Top-Left & Top-Right Viewport Telemetry Overlay -->
+      <div class="viewport-hud-top">
+        <div class="hud-card hud-scale-readout">
+          <div>
+            <div style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.7px; color:var(--text-muted);">
+              Camera Field of View Scale
+            </div>
+            <div class="hud-scale-value" id="hud-fov-scale">Scale 2 • 400 mm Optical Core</div>
+          </div>
+          <div style="height:26px; width:1px; background:var(--border-subtle);"></div>
+          <div class="hud-scale-desc" id="hud-hint">
+            Scroll to zoom across 5 orders of magnitude (2.4 m → 1 µm) • Click any 3D part to inspect
+          </div>
+        </div>
+
+        <div class="hud-quick-actions">
+          <button id="btn-zoom-in" class="action-btn" title="Zoom In Closer to Focal Plane">＋ Zoom In</button>
+          <button id="btn-zoom-out" class="action-btn" title="Zoom Out to Macro System">－ Zoom Out</button>
+          <button id="btn-focus-zones" class="action-btn primary" title="Jump directly inside the 5-Zone Focal Plane">
+            🎯 5-Zone Focal Plane
+          </button>
+          <button id="btn-focus-tweezer" class="action-btn" title="Zoom into a single Rydberg-blockaded optical tweezer pair">
+            🔬 Single Tweezer (10 µm)
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Live 5-Stage Fault-Tolerant Quantum Execution Cycle Bar -->
+      <section class="cycle-bar" aria-label="Fault-Tolerant Zoned Execution Cycle">
+        <div class="cycle-top-row">
+          <div class="cycle-title-group">
+            <button id="btn-cycle-play" class="cycle-play-btn">⏸ Pause Cycle</button>
+            <span class="cycle-stage-name" id="cycle-stage-name">Stage 1: Continuous Lattice Conveyor Reload & Sorting</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="cycle-stage-time" id="cycle-stage-time">300,000 atoms/s</span>
+            <button id="btn-follow-stage" class="action-btn" style="padding:3px 8px; font-size:10.5px;">
+              🎥 Camera Follow Stage: OFF
+            </button>
+          </div>
+        </div>
+
+        <div class="cycle-steps-grid" id="cycle-steps-grid">
+          <!-- Populated dynamically from executionStages -->
+        </div>
+
+        <div class="cycle-desc-row">
+          <span id="cycle-stage-desc">
+            Dual 1064 nm standing-wave optical lattice conveyor belts transport cold atoms from the shielded 2D/3D MOT reservoir into Zone 1 without disturbing coherence in Zone 3.
+          </span>
+          <span class="cycle-citation" id="cycle-stage-citation">
+            Chiu et al., Nature 646 (Sept 2025)
+          </span>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==================================================================
+         RIGHT SIDEBAR: ENGINEERING INSPECTOR & SUBSYSTEM DATASHEET
+         ================================================================== -->
+    <aside class="right-panel" id="right-panel">
+      <div class="inspector-header">
+        <span class="inspector-cat-badge" id="insp-category">3. 5-Zone Focal Plane (600 µm)</span>
+        <h2 class="inspector-title" id="insp-title">Zone 4: Parallel Rydberg Entangling Zone</h2>
+        <div class="inspector-scale" id="insp-scale">Scale 4 • Focal Plane Mid-Right (x = +60 to +180 µm)</div>
+        <div class="inspector-btn-row">
+          <button id="btn-insp-zoom" class="action-btn primary" style="flex:1; justify-content:center;">
+            🔍 Fly Camera Here
+          </button>
+          <button id="btn-insp-isolate" class="action-btn" style="flex:1; justify-content:center;">
+            👁️ Isolate Part
+          </button>
+        </div>
+      </div>
+
+      <div class="inspector-card">
+        <div class="card-label">Quantitative Engineering Specifications</div>
+        <table class="specs-table" id="insp-specs-table">
+          <!-- Populated dynamically -->
+        </table>
+      </div>
+
+      <div class="inspector-card">
+        <div class="card-label">Physical Mechanism & Architectural Role</div>
+        <p class="role-text" id="insp-role"></p>
+      </div>
+
+      <div class="inspector-card">
+        <div class="card-label">Governing Physics / Control Relation</div>
+        <div class="equation-box" id="insp-equation"></div>
+      </div>
+
+      <div class="inspector-card">
+        <div class="card-label">Primary 2023–2026 Literature Foundations</div>
+        <ul class="papers-list" id="insp-papers"></ul>
+      </div>
+
+      <!-- Active Species Architecture Summary Card -->
+      <div class="inspector-card" style="border-color:rgba(16, 185, 129, 0.35);">
+        <div class="card-label" style="color:var(--accent-emerald);">Active Species & Qubit Configuration</div>
+        <div id="species-summary-box" style="display:flex; flex-direction:column; gap:5px; font-size:11px;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: 2023–2026 LANDMARK PAPERS & SYSTEM BENCHMARK MATRIX
+       ==================================================================== -->
+  <div id="papers-modal" class="modal-backdrop hidden">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size:16px; font-weight:700; color:#fff;">
+            3D Neutral-Atom Quantum Computer Architectural Synthesis &amp; 2023–2026 Breakthrough Literature
+          </h2>
+          <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+            Complete reference of experimental milestones integrated into this 3D neutral-atom processor design
+          </div>
+        </div>
+        <button id="btn-close-papers" class="action-btn">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="metrics-banner" id="modal-metrics-banner">
+          <!-- Populated by app.js -->
+        </div>
+        <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:var(--accent-cyan);">
+          Foundational 2023–2026 Papers & Experimental Results
+        </div>
+        <div class="papers-grid" id="modal-papers-grid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="components-data.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

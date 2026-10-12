@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bleximo Autonomous Quantum EDA Studio — Spec-to-GDS & Cryo Calibration</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #131a26;
+      --panel-border: #233044;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #e09f67;
+      --cyan: #00f5d4;
+      --teal: #2ec4b6;
+      --blue: #38bdf8;
+      --purple: #a78bfa;
+      --red: #ff595e;
+      --green: #4ade80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      line-height: 1.45;
+      padding: 18px 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .brand h1 {
+      font-size: 1.45rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    button, .btn {
+      background: #1f2937;
+      color: var(--text);
+      border: 1px solid #374151;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    button:hover, .btn:hover {
+      border-color: var(--accent);
+      background: #273549;
+    }
+    button.primary, .btn.primary {
+      background: var(--accent);
+      color: #0b0f17;
+      border-color: var(--accent);
+    }
+    button.active {
+      background: #064e3b;
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .kpi .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .kpi .val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 4px;
+      color: var(--text);
+    }
+    .kpi .sub {
+      font-size: 0.75rem;
+      color: var(--green);
+      margin-top: 2px;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .card h2 {
+      font-size: 1.0rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0d131d;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #1e293b;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    canvas {
+      width: 100%;
+      background: #090d14;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 8px;
+    }
+    th, td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid #1e293b;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    tr.selected-row {
+      background: rgba(0, 245, 212, 0.12);
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .badge-ok { background: #064e3b; color: var(--green); }
+    .sub-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .List-pills {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      list-style: none;
+    }
+    .List-pills li {
+      margin-bottom: 6px;
+      padding-left: 14px;
+      position: relative;
+    }
+    .List-pills li::before {
+      content: "✓";
+      color: var(--accent);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>EDA Software for Superconducting Quantum Processors</h1>
+      <p>Autonomous Spec-to-GDS Synthesis, EPR + Cryo Experiment Refinement &amp; Multi-Repo Calibration Studio</p>
+    </div>
+    <div class="actions">
+      <button id="btnPlay" class="primary" onclick="togglePlayAnimation()">▶ Play HFSS/GDS Construction Video</button>
+      <button id="btnToggleCal" class="active" onclick="toggleCalibrationMode()">Showing: v2 (10 mK Cryo-Calibrated)</button>
+      <a id="downloadGds" class="btn" download="Cerbero_8Q_v2_CryoCalibrated.gds" href="data:application/octet-stream;base64,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AAYOAgAAACwQA//p320ABRT8/+ngcwAFFPz/6eBzAAVLrP/p320ABUus/+nfbQAFFPwABBEAAAQIAAAGDQIABAAGDgIAAAAsEAP/6ZmgAAUohP/poXAABSiE/+mhcAAFOCT/6ZmgAAU4JP/pmaAABSiEAAQRAAAECAAABg0CAAQABg4CAAAALBAD/+oecAAFKIT/6iZAAAUohP/qJkAABTgk/+oecAAFOCT/6h5wAAUohAAEEQAABAgAAAYNAgABAAYOAgAAAQwQA//5IjAAFvbo//jcmAAWKX7/+54qABYoX//7hw4AFABT//YIzgAUAFP/9gjOABOYZf/7hw4AE5hl//uHDgARaEP/9gjOABFoQ//2CM4AEQBV//uHDgARAFX/+4cOAA7QM//2CM4ADtAz//Yf6gAOYC//+QhRAA4/qv/5IjAACov8//g30AAKi/z/+FGvAA2sxv/1u9YADYxB//XS8gAPtE3/+1EyAA+0Tf/7UTIAEBw7//XS8gAQHDv/9dLyABJMXf/7UTIAEkxd//tRMgAStEv/9dLyABK0S//10vIAFORt//tRMgAU5G3/+zoWABVUcf/4fWgAFVNS//g30AAW9uj/+SIwABb26AAEEQAABAgAAAYNAgACAAYOAgAAAQwQA//4+yAAFvbo//jMuwAWBcz/+418ABYFDf/7fhQAFCZX//X/1AAUJlf/9f/UABNyYf/7fhQAE3Jh//t+FAARjkf/9f/UABGOR//1/9QAENpR//t+FAAQ2lH/+34UAA72N//1/9QADvY3//YPPAAOPN3/+OnhAA4nLv/4+yAACov8//he4AAKi/z/+HAfAA3FQv/1zIQADa+T//Xb7AAPjkn/+1osAA+OSf/7WiwAEEI///Xb7AAQQj//9dvsABImWf/7WiwAEiZZ//taLAAS2k//9dvsABLaT//12+wAFL5p//taLAAUvmn/+0rEABV3w//4jUUAFXcE//he4AAW9uj/+PsgABb26AAEEQAABAgAAAYNAgABAAYOAgAAACwQA//1UaAAAHnc//wIYAAAedz//AhgAAo93P/1UaAACj3c//VRoAAAedwABBEAAAQIAAAGDQIAAgAGDgIAAAAsEAP/9l8oAAEzaP/4boAAATNo//hugAAJhFD/9l8oAAmEUP/2XygAATNoAAQRAAAECAAABg0CAAIABg4CAAAALBAD//jrgAABM2j/+vrYAAEzaP/6+tgACYRQ//jrgAAJhFD/+OuAAAEzaAAEEQAABAgAAAYNAgADAAYOAgAAACwQA//4XuAABVtj//j7IAAFW2P/+PsgAAVcVv/4XuAABVxW//he4AAFW2MABBEAAAQIAAAGDQIAAwAGDgIAAAAsEAP/+Kx6AAVAhP/4rYYABUCE//ithgAFdzT/+Kx6AAV3NP/4rHoABUCEAAQRAAAECAAABg0CAAQABg4CAAAALBAD//hmsAAFVAz/+G6AAAVUDP/4boAABWOs//hmsAAFY6z/+GawAAVUDAAEEQAABAgAAAYNAgAEAAYOAgAAACwQA//464AABVQM//jzUAAFVAz/+PNQAAVjrP/464AABWOs//jrgAAFVAwABBEAAAQIAAAGDQIAAQAGDgIAAAEMEAMAB8gwABb26AAHgpgAFil+AApEKgAWKF8ACi0OABQAUwAErs4AFABTAASuzgATmGUACi0OABOYZQAKLQ4AEWhDAASuzgARaEMABK7OABEAVQAKLQ4AEQBVAAotDgAO0DMABK7OAA7QMwAExeoADmAvAAesfgAOQeAAB8gwAAq2iAAG3dAACraIAAb5ggANqpAABGHWAA2MQQAEePIAD7RNAAn3MgAPtE0ACfcyABAcOwAEePIAEBw7AAR48gASTF0ACfcyABJMXQAJ9zIAErRLAAR48gAStEsABHjyABTkbQAJ9zIAFORtAAngFgAVVHEAByNoABVTUgAG3dAAFvboAAfIMAAW9ugABBEAAAQIAAAGDQIAAgAGDgIAAAEMEAMAB6EgABb26AAHcrsAFgXMAAozfAAWBQ0ACiQUABQmVwAEpdQAFCZXAASl1AATcmEACiQUABNyYQAKJBQAEY5HAASl1AARjkcABKXUABDaUQAKJBQAENpRAAokFAAO9jcABKXUAA72NwAEtTwADjzdAAeOqQAOKKgAB6EgAAq2iAAHBOAACraIAAcXVwANw8gABHKEAA2vkwAEgewAD45JAAoALAAPjkkACgAsABBCPwAEgewAEEI/AASB7AASJlkACgAsABImWQAKACwAEtpPAASB7AAS2k8ABIHsABS+aQAKACwAFL5pAAnwxAAVd8MABzNFABV3BAAHBOAAFvboAAehIAAW9ugABBEAAAQIAAAGDQIAAQAGDgIAAAAsEAMAA/egAACkaAAKrmAAAKRoAAquYAAKaGgAA/egAApoaAAD96AAAKRoAAQRAAAECAAABg0CAAIABg4CAAAALBADAAUFKAABXfQABxSAAAFd9AAHFIAACa7cAAUFKAAJrtwABQUoAAFd9AAEEQAABAgAAAYNAgACAAYOAgAAACwQAwAHkYAAAV30AAmg2AABXfQACaDYAAmu3AAHkYAACa7cAAeRgAABXfQABBEAAAQIAAAGDQIAAwAGDgIAAAAsEAMABwTgAAWF8QAHoSAABYXxAAehIAAFht8ABwTgAAWG3wAHBOAABYXxAAQRAAAECAAABg0CAAMABg4CAAAALBADAAdSfQAFaxAAB1ODAAVrEAAHU4MABaHAAAdSfQAFocAAB1J9AAVrEAAEEQAABAgAAAYNAgAEAAYOAgAAACwQAwAHDLAABX6YAAcUgAAFfpgABxSAAAWOOAAHDLAABY44AAcMsAAFfpgABBEAAAQIAAAGDQIABAAGDgIAAAAsEAMAB5GAAAV+mAAHmVAABX6YAAeZUAAFjjgAB5GAAAWOOAAHkYAABX6YAAQRAAAECAAABg0CAAEABg4CAAABDBADABaVQAAW9ugAFk+oABYpfgAZEToAFihfABj6HgAUAFMAE3veABQAUwATe94AE5hlABj6HgATmGUAGPoeABFoQwATe94AEWhDABN73gARAFUAGPoeABEAVQAY+h4ADtAzABN73gAO0DMAE5L6AA5gLwAWd5sADkQfABaVQAAK4BgAFargAArgGAAVyIUADahRABMu5gANjEEAE0YCAA+0TQAYxEIAD7RNABjEQgAQHDsAE0YCABAcOwATRgIAEkxdABjEQgASTF0AGMRCABK0SwATRgIAErRLABNGAgAU5G0AGMRCABTkbQAYrSYAFVRxABXweAAVU1IAFargABb26AAWlUAAFvboAAQRAAAECAAABg0CAAIABg4CAAABDBADABZuMAAW9ugAFj/LABYFzAAZAIwAFgUNABjxJAAUJlcAE3LkABQmVwATcuQAE3JhABjxJAATcmEAGPEkABGORwATcuQAEY5HABNy5AAQ2lEAGPEkABDaUQAY8SQADvY3ABNy5AAO9jcAE4JMAA483QAWWm0ADiooABZuMAAK4BgAFdHwAArgGAAV5bMADcJIABM/lAANr5MAE078AA+OSQAYzTwAD45JABjNPAAQQj8AE078ABBCPwATTvwAEiZZABjNPAASJlkAGM08ABLaTwATTvwAEtpPABNO/AAUvmkAGM08ABS+aQAYvdQAFXfDABYAVQAVdwQAFdHwABb26AAWbjAAFvboAAQRAAAECAAABg0CAAEABg4CAAAALBADABLEsAAAzfgAGXtwAADN+AAZe3AACpH4ABLEsAAKkfgAEsSwAADN+AAEEQAABAgAAAYNAgACAAYOAgAAACwQAwAT0jgAAYeEABXhkAABh4QAFeGQAAnYbAAT0jgACdhsABPSOAABh4QABBEAAAQIAAAGDQIAAgAGDgIAAAAsEAMAFl6QAAGHhAAYbegAAYeEABht6AAJ2GwAFl6QAAnYbAAWXpAAAYeEAAQRAAAECAAABg0CAAMABg4CAAAALBADABXR8AAFr44AFm4wAAWvjgAWbjAABbBiABXR8AAFsGIAFdHwAAWvjgAEEQAABAgAAAYNAgADAAYOAgAAACwQAwAWH5oABZSgABYghgAFlKAAFiCGAAXLUAAWH5oABctQABYfmgAFlKAABBEAAAQIAAAGDQIABAAGDgIAAAAsEAMAFdnAAAWoKAAV4ZAABagoABXhkAAFt8gAFdnAAAW3yAAV2cAABagoAAQRAAAECAAABg0CAAQABg4CAAAALBADABZekAAFqCgAFmZgAAWoKAAWZmAABbfIABZekAAFt8gAFl6QAAWoKAAEEQAABAgAAAYNAgABAAYOAgAAAQwQA//pasD/6QkY/+mwWP/qrK7/7G0G/+qrj//shCL/6xuT/+cF4v/rG5P/5wXi/+1Ltf/shCL/7Uu1/+yEIv/ts6P/5wXi/+2zo//nBeL/7+PF/+yEIv/v48X/7IQi//BLs//nBeL/8Euz/+buxv/yc7//6Yp4//JZ9f/pasD/9PdU/+pVIP/091T/6jVo//G5m//nUtr/8Z/R/+c7vv/xL83/7Ln+//Evzf/suf7/7v+r/+c7vv/u/6v/5zu+/+6Xvf/suf7/7pe9/+y5/v/sZ5v/5zu+/+xnm//nO77/6/+t/+y5/v/r/63/7NEa/+nXof/qD4j/6daC/+pVIP/pCRj/6WrA/+kJGAAEEQAABAgAAAYNAgACAAYOAgAAAQwQA//pkdD/6QkY/+nANf/qiPz/7H20/+qIPf/sjRz/60GX/+cO3P/rQZf/5w7c/+0lsf/sjRz/7SWx/+yNHP/t2af/5w7c/+3Zp//nDtz/773B/+yNHP/vvcH/7I0c//Bxt//nDtz/8HG3/+b/dP/yUG3/6ab1//I/O//pkdD/9PdU/+ouEP/091T/6hjr//HUVf/nQiz/8cMj/+cyxP/xCcn/7LEE//EJyf/ssQT/7yWv/+cyxP/vJa//5zLE/+5xuf/ssQT/7nG5/+yxBP/sjZ//5zLE/+yNn//nMsT/69mp/+yxBP/r2an/7MBs/+n68//p/6v/6fo0/+ouEP/pCRj/6ZHQ/+kJGAAEEQAABAgAAAYNAgABAAYOAgAAACwQA//mhJD/9UV0/+07UP/1RXT/7TtQ//8JdP/mhJD//wl0/+aEkP/1RXQABBEAAAQIAAAGDQIAAgAGDgIAAAAsEAP/55IY//X/AP/poXD/9f8A/+mhcP/+T+j/55IY//5P6P/nkhj/9f8AAAQRAAAECAAABg0CAAIABg4CAAAALBAD/+oecP/1/wD/7C3I//X/AP/sLcj//k/o/+oecP/+T+j/6h5w//X/AAAEEQAABAgAAAYNAgADAAYOAgAAACwQA//pkdD/+icM/+ouEP/6Jwz/6i4Q//on2//pkdD/+ifb/+mR0P/6JwwABBEAAAQIAAAGDQIAAwAGDgIAAAAsEAP/6d99//oMHP/p4GP/+gwc/+ngY//6Qsz/6d99//pCzP/p333/+gwcAAQRAAAECAAABg0CAAQABg4CAAAALBAD/+mZoP/6H6T/6aFw//ofpP/poXD/+i9E/+mZoP/6L0T/6Zmg//ofpAAEEQAABAgAAAYNAgAEAAYOAgAAACwQA//qHnD/+h+k/+omQP/6H6T/6iZA//ovRP/qHnD/+i9E/+oecP/6H6QABBEAAAQIAAAGDQIAAQAGDgIAAAEMEAP/+DfQ/+kJGP/4fWj/6qyu//s6Fv/qq4//+1Ey/+sbk//10vL/6xuT//XS8v/tS7X/+1Ey/+1Ltf/7UTL/7bOj//XS8v/ts6P/9dLy/+/jxf/7UTL/7+PF//tRMv/wS7P/9dLy//BLs//1u9b/8nO///hZwP/yXEL/+DfQ//TPhP/5IjD/9M+E//kAQP/xt07/9h/q//Gf0f/2CM7/8S/N//uHDv/xL83/+4cO/+7/q//2CM7/7v+r//YIzv/ul73/+4cO/+6Xvf/7hw7/7Geb//YIzv/sZ5v/9gjO/+v/rf/7hw7/6/+t//ueKv/p16H/+NyY/+nWgv/5IjD/6QkY//g30P/pCRgABBEAAAQIAAAGDQIAAgAGDgIAAAEMEAP/+F7g/+kJGP/4jUX/6oj8//tKxP/qiD3/+1os/+tBl//12+z/60GX//Xb7P/tJbH/+1os/+0lsf/7Wiz/7dmn//Xb7P/t2af/9dvs/++9wf/7Wiz/773B//taLP/wcbf/9dvs//Bxt//1zIT/8lBt//h1gP/yQMT/+F7g//TPhP/4+yD/9M+E//jkgP/x0sz/9g88//HDI//1/9T/8QnJ//t+FP/xCcn/+34U/+8lr//1/9T/7yWv//X/1P/ucbn/+34U/+5xuf/7fhT/7I2f//X/1P/sjZ//9f/U/+vZqf/7fhT/69mp//uNfP/p+vP/+My7/+n6NP/4+yD/6QkY//he4P/pCRgABBEAAAQIAAAGDQIAAQAGDgIAAAAsEAP/9VGg//UdpP/8CGD/9R2k//wIYP/+4aT/9VGg//7hpP/1UaD/9R2kAAQRAAAECAAABg0CAAIABg4CAAAALBAD//ZfKP/11zD/+G6A//XXMP/4boD//igY//ZfKP/+KBj/9l8o//XXMAAEEQAABAgAAAYNAgACAAYOAgAAACwQA//464D/9dcw//r62P/11zD/+vrY//4oGP/464D//igY//jrgP/11zAABBEAAAQIAAAGDQIAAwAGDgIAAAAsEAP/+F7g//n/Ov/4+yD/+f86//j7IP/6AA7/+F7g//oADv/4XuD/+f86AAQRAAAECAAABg0CAAMABg4CAAAALBAD//isiv/55Ez/+K12//nkTP/4rXb/+hr8//isiv/6Gvz/+KyK//nkTAAEEQAABAgAAAYNAgAEAAYOAgAAACwQA//4ZrD/+ffU//hugP/599T/+G6A//oHdP/4ZrD/+gd0//hmsP/599QABBEAAAQIAAAGDQIABAAGDgIAAAAsEAP/+OuA//n31P/481D/+ffU//jzUP/6B3T/+OuA//oHdP/464D/+ffUAAQRAAAECAAABg0CAAEABg4CAAABDBADAAbd0P/pCRgAByNo/+qsrgAJ4Bb/6quPAAn3Mv/rG5MABHjy/+sbkwAEePL/7Uu1AAn3Mv/tS7UACfcy/+2zowAEePL/7bOjAAR48v/v48UACfcy/+/jxQAJ9zL/8EuzAAR48v/wS7MABGHW//JzvwAHAhr/8l6RAAbd0P/0qLAAB8gw//SosAAHo+b/8bT/AATF6v/xn9EABK7O//EvzQAKLQ7/8S/NAAotDv/u/6sABK7O/+7/qwAErs7/7pe9AAotDv/ul70ACi0O/+xnmwAErs7/7GebAASuzv/r/60ACi0O/+v/rQAKRCr/6dehAAeCmP/p1oIAB8gw/+kJGAAG3dD/6QkYAAQRAAAECAAABg0CAAIABg4CAAABDBADAAcE4P/pCRgABzNF/+qI/AAJ8MT/6og9AAoALP/rQZcABIHs/+tBlwAEgez/7SWxAAoALP/tJbEACgAs/+3ZpwAEgez/7dmnAASB7P/vvcEACgAs/++9wQAKACz/8HG3AASB7P/wcbcABHKE//JQbQAHHRH/8kJOAAcE4P/0qLAAB6Eg//SosAAHiO//8dFCAAS1PP/xwyMABKXU//EJyQAKJBT/8QnJAAokFP/vJa8ABKXU/+8lrwAEpdT/7nG5AAokFP/ucbkACiQU/+yNnwAEpdT/7I2fAASl1P/r2akACiQU/+vZqQAKM3z/6frzAAdyu//p+jQAB6Eg/+kJGAAHBOD/6QkYAAQRAAAECAAABg0CAAEABg4CAAAALBADAAP3oP/09tAACq5g//T20AAKrmD//rrQAAP3oP/+utAAA/eg//T20AAEEQAABAgAAAYNAgACAAYOAgAAACwQAwAFBSj/9bBcAAcUgP/1sFwABxSA//4BRAAFBSj//gFEAAUFKP/1sFwABBEAAAQIAAAGDQIAAgAGDgIAAAAsEAMAB5GA//WwXAAJoNj/9bBcAAmg2P/+AUQAB5GA//4BRAAHkYD/9bBcAAQRAAAECAAABg0CAAMABg4CAAAALBADAAcE4P/52GgAB6Eg//nYaAAHoSD/+dk3AAcE4P/52TcABwTg//nYaAAEEQAABAgAAAYNAgADAAYOAgAAACwQAwAHUo3/+b14AAdTc//5vXgAB1Nz//n0KAAHUo3/+fQoAAdSjf/5vXgABBEAAAQIAAAGDQIABAAGDgIAAAAsEAMABwyw//nRAAAHFID/+dEAAAcUgP/54KAABwyw//ngoAAHDLD/+dEAAAQRAAAECAAABg0CAAQABg4CAAAALBADAAeRgP/50QAAB5lQ//nRAAAHmVD/+eCgAAeRgP/54KAAB5GA//nRAAAEEQAABAgAAAYNAgABAAYOAgAAAQwQAwAVquD/6QkYABXweP/qrK4AGK0m/+qrjwAYxEL/6xuTABNGAv/rG5MAE0YC/+1LtQAYxEL/7Uu1ABjEQv/ts6MAE0YC/+2zowATRgL/7+PFABjEQv/v48UAGMRC//BLswATRgL/8EuzABMu5v/yc78AFdGp//Jg4QAVquD/9IK8ABaVQP/0grwAFm53//GyrwATkvr/8Z/RABN73v/xL80AGPoe//EvzQAY+h7/7v+rABN73v/u/6sAE3ve/+6XvQAY+h7/7pe9ABj6Hv/sZ5sAE3ve/+xnmwATe97/6/+tABj6Hv/r/60AGRE6/+nXoQAWT6j/6daCABaVQP/pCRgAFarg/+kJGAAEEQAABAgAAAYNAgACAAYOAgAAAQwQAwAV0fD/6QkYABYAVf/qiPwAGL3U/+qIPQAYzTz/60GXABNO/P/rQZcAE078/+0lsQAYzTz/7SWxABjNPP/t2acAE078/+3ZpwATTvz/773BABjNPP/vvcEAGM08//BxtwATTvz/8HG3ABM/lP/yUG0AFevL//JD2AAV0fD/9IK8ABZuMP/0grwAFlRV//HPuAATgkz/8cMjABNy5P/xCckAGPEk//EJyQAY8ST/7yWvABNy5P/vJa8AE3Lk/+5xuQAY8ST/7nG5ABjxJP/sjZ8AE3Lk/+yNnwATcuT/69mpABjxJP/r2akAGQCM/+n68wAWP8v/6fo0ABZuMP/pCRgAFdHw/+kJGAAEEQAABAgAAAYNAgABAAYOAgAAACwQAwASxLD/9NDcABl7cP/00NwAGXtw//6U3AASxLD//pTcABLEsP/00NwABBEAAAQIAAAGDQIAAgAGDgIAAAAsEAMAE9I4//WKaAAV4ZD/9YpoABXhkP/921AAE9I4//3bUAAT0jj/9YpoAAQRAAAECAAABg0CAAIABg4CAAAALBADABZekP/1imgAGG3o//WKaAAYbej//dtQABZekP/921AAFl6Q//WKaAAEEQAABAgAAAYNAgADAAYOAgAAACwQAwAV0fD/+bJnABZuMP/5smcAFm4w//mzUAAV0fD/+bNQABXR8P/5smcABBEAAAQIAAAGDQIAAwAGDgIAAAAsEAMAFh+Q//mXhAAWIJD/+ZeEABYgkP/5zjQAFh+Q//nONAAWH5D/+ZeEAAQRAAAECAAABg0CAAQABg4CAAAALBADABXZwP/5qwwAFeGQ//mrDAAV4ZD/+bqsABXZwP/5uqwAFdnA//mrDAAEEQAABAgAAAYNAgAEAAYOAgAAACwQAwAWXpD/+asMABZmYP/5qwwAFmZg//m6rAAWXpD/+bqsABZekP/5qwwABBEAAAQIAAAGDQIABgAGDgIAAAEsEAP/48VwAAAAAP/jv4EAAEPV/+Ot4QAAhZr/45EbAADDUP/jagwAAPsX/+M55wABKzz/4wIgAAFSS//ixGoAAW8R/+KCpQABgLH/4j7QAAGGoP/h+vsAAYCx/+G5NgABbxH/4XuAAAFSS//hQ7kAASs8/+ETlAAA+xf/4OyFAADDUP/gz78AAIWa/+C+HwAAQ9X/4LgwAAAAAP/gvh///7wr/+DPv///emb/4OyF//88sP/hE5T//wTp/+FDuf/+1MT/4XuA//6ttf/huTb//pDv/+H6+//+f0//4j7Q//55YP/igqX//n9P/+LEav/+kO//4wIg//6ttf/jOef//tTE/+NqDP//BOn/45Eb//88sP/jreH//3pm/+O/gf//vCv/48VwAAAAAAAEEQAABAgAAAYNAgAFAAYOAgAAASwQA//ioHgAAAAA/+Ke/AAAEPX/4pqUAAAhZ//ik2MAADDU/+KJnwAAPsb/4n2WAABKz//ib6QAAFST/+JgNwAAW8T/4k/FAABgLP/iPtAAAGGo/+It2wAAYCz/4h1pAABbxP/iDfwAAFST/+IACgAASs//4fQBAAA+xv/h6j0AADDU/+HjDAAAIWf/4d6kAAAQ9f/h3SgAAAAA/+HepP//7wv/4eMM///emf/h6j3//88s/+H0Af//wTr/4gAK//+1Mf/iDfz//6tt/+Idaf//pDz/4i3b//+f1P/iPtD//55Y/+JPxf//n9T/4mA3//+kPP/ib6T//6tt/+J9lv//tTH/4omf///BOv/ik2P//88s/+KalP//3pn/4p78///vC//ioHgAAAAAAAQRAAAECAAABg0CAAYABg4CAAABLBAD//LgoAAAAAD/8tqxAABD1f/yyREAAIWa//KsSwAAw1D/8oU8AAD7F//yVRcAASs8//IdUAABUkv/8d+aAAFvEf/xndUAAYCx//FaAAABhqD/8RYrAAGAsf/w1GYAAW8R//CWsAABUkv/8F7pAAErPP/wLsQAAPsX//AHtQAAw1D/7+rvAACFmv/v2U8AAEPV/+/TYAAAAAD/79lP//+8K//v6u///3pm//AHtf//PLD/8C7E//8E6f/wXun//tTE//CWsP/+rbX/8NRm//6Q7//xFiv//n9P//FaAP/+eWD/8Z3V//5/T//x35r//pDv//IdUP/+rbX/8lUX//7UxP/yhTz//wTp//KsS///PLD/8skR//96Zv/y2rH//7wr//LgoAAAAAAABBEAAAQIAAAGDQIABQAGDgIAAAEsEAP/8buoAAAAAP/xuiwAABD1//G1xAAAIWf/8a6TAAAw1P/xpM8AAD7G//GYxgAASs//8YrUAABUk//xe2cAAFvE//Fq9QAAYCz/8VoAAABhqP/xSQsAAGAs//E4mQAAW8T/8SksAABUk//xGzoAAErP//EPMQAAPsb/8QVtAAAw1P/w/jwAACFn//D51AAAEPX/8PhYAAAAAP/w+dT//+8L//D+PP//3pn/8QVt///PLP/xDzH//8E6//EbOv//tTH/8Sks//+rbf/xOJn//6Q8//FJC///n9T/8VoA//+eWP/xavX//5/U//F7Z///pDz/8YrU//+rbf/xmMb//7Ux//Gkz///wTr/8a6T///PLP/xtcT//96Z//G6LP//7wv/8buoAAAAAAAEEQAABAgAAAYNAgAGAAYOAgAAASwQAwABhqAAAAAAAAGAsQAAQ9UAAW8RAACFmgABUksAAMNQAAErPAAA+xcAAPsXAAErPAAAw1AAAVJLAACFmgABbxEAAEPVAAGAsQAAAAAAAYag//+8KwABgLH//3pmAAFvEf//PLAAAVJL//8E6QABKzz//tTEAAD7F//+rbUAAMNQ//6Q7wAAhZr//n9PAABD1f/+eWAAAAAA//5/T///vCv//pDv//96Zv/+rbX//zyw//7UxP//BOn//wTp//7UxP//PLD//q21//96Zv/+kO///7wr//5/TwAAAAD//nlgAABD1f/+f08AAIWa//6Q7wAAw1D//q21AAD7F//+1MQAASs8//8E6QABUkv//zywAAFvEf//emYAAYCx//+8KwABhqAAAAAAAAQRAAAECAAABg0CAAUABg4CAAABLBADAABhqAAAAAAAAGAsAAAQ9QAAW8QAACFnAABUkwAAMNQAAErPAAA+xgAAPsYAAErPAAAw1AAAVJMAACFnAABbxAAAEPUAAGAsAAAAAAAAYaj//+8LAABgLP//3pkAAFvE///PLAAAVJP//8E6AABKz///tTEAAD7G//+rbQAAMNT//6Q8AAAhZ///n9QAABD1//+eWAAAAAD//5/U///vC///pDz//96Z//+rbf//zyz//7Ux///BOv//wTr//7Ux///PLP//q23//96Z//+kPP//7wv//5/UAAAAAP//nlgAABD1//+f1AAAIWf//6Q8AAAw1P//q20AAD7G//+1MQAASs///8E6AABUk///zywAAFvE///emQAAYCz//+8LAABhqAAAAAAABBEAAAQIAAAGDQIABgAGDgIAAAEsEAMAECygAAAAAAAQJrEAAEPVABAVEQAAhZoAD/hLAADDUAAP0TwAAPsXAA+hFwABKzwAD2lQAAFSSwAPK5oAAW8RAA7p1QABgLEADqYAAAGGoAAOYisAAYCxAA4gZgABbxEADeKwAAFSSwANqukAASs8AA16xAAA+xcADVO1AADDUAANNu8AAIWaAA0lTwAAQ9UADR9gAAAAAAANJU///7wrAA027///emYADVO1//88sAANesT//wTpAA2q6f/+1MQADeKw//6ttQAOIGb//pDvAA5iK//+f08ADqYA//55YAAO6dX//n9PAA8rmv/+kO8AD2lQ//6ttQAPoRf//tTEAA/RPP//BOkAD/hL//88sAAQFRH//3pmABAmsf//vCsAECygAAAAAAAEEQAABAgAAAYNAgAFAAYOAgAAASwQAwAPB6gAAAAAAA8GLAAAEPUADwHEAAAhZwAO+pMAADDUAA7wzwAAPsYADuTGAABKzwAO1tQAAFSTAA7HZwAAW8QADrb1AABgLAAOpgAAAGGoAA6VCwAAYCwADoSZAABbxAAOdSwAAFSTAA5nOgAASs8ADlsxAAA+xgAOUW0AADDUAA5KPAAAIWcADkXUAAAQ9QAORFgAAAAAAA5F1P//7wsADko8///emQAOUW3//88sAA5bMf//wToADmc6//+1MQAOdSz//6ttAA6Emf//pDwADpUL//+f1AAOpgD//55YAA629f//n9QADsdn//+kPAAO1tT//6ttAA7kxv//tTEADvDP///BOgAO+pP//88sAA8BxP//3pkADwYs///vCwAP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">⬇ Download GDSII Mask (.gds)</a>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Frequency Guard Band</div>
+      <div class="val" id="kpiMargin">83.2 MHz</div>
+      <div class="sub">All CR A1/A2/E/F/M1 satisfied</div>
+    </div>
+    <div class="kpi">
+      <div class="label">10 mK Qubit Freq RMSE</div>
+      <div class="val">269.7 → 16.6 MHz</div>
+      <div class="sub">16.2× error reduction via Cryo Cal</div>
+    </div>
+    <div class="kpi">
+      <div class="label">10 mK Cavity Freq RMSE</div>
+      <div class="val">178.5 → 1.0 MHz</div>
+      <div class="sub">Extracted Ta α_k = 3.80%</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Zero-Collision Chip Yield</div>
+      <div class="val">97.4% / 99.8%</div>
+      <div class="sub">At measured wafer σ_f = 17.7 MHz</div>
+    </div>
+    <div class="kpi">
+      <div class="label">TLS Coherence Limit (cpw)</div>
+      <div class="val">Q_TLS = 2.29M</div>
+      <div class="sub">T1_TLS = 57.0 μs @ w = 40 μm</div>
+    </div>
+    <div class="kpi">
+      <div class="label">3D TSV Confocal &amp; DRC</div>
+      <div class="val">240.2 μm / CLEAN</div>
+      <div class="sub">74.2° taper | BleximoX3 .lydrc</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- Left Column: Interactive CAD & HFSS/GDS Construction Canvas -->
+    <div class="card">
+      <h2>
+        <span>Interactive 8-Qubit Processor CAD &amp; Automated Layout Synthesis</span>
+        <span id="stageLabel" style="font-size:0.8rem; color:var(--cyan);">Step 6/6: Full Production Mask</span>
+      </h2>
+      <div class="controls-bar">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:0.78rem; color:var(--muted);">Construction Step:</span>
+          <input id="stepSlider" type="range" min="1" max="6" value="6" oninput="setStep(parseInt(this.value))" />
+        </div>
+        <div style="font-size:0.76rem; color:var(--muted);">
+          Click any qubit (Q0–Q7) on canvas to inspect Manhattan JJ &amp; Resonator trim
+        </div>
+      </div>
+      <canvas id="chipCanvas" width="700" height="580"></canvas>
+
+      <div class="sub-grid">
+        <div class="card" style="padding:12px;">
+          <h2 style="font-size:0.88rem;">Selected Qubit &amp; Manhattan JJ Zoom</h2>
+          <canvas id="jjCanvas" width="310" height="155"></canvas>
+        </div>
+        <div class="card" style="padding:12px;">
+          <h2 style="font-size:0.88rem;">Bleximo Invention Capabilities (Live)</h2>
+          <ul class="List-pills">
+            <li>Evaluates quantum properties via EPR + <b>experiment-derived correction coefficients</b> (Ta α<sub>k</sub>=3.80%, Δw<sub>JJ</sub>, TSV bias)</li>
+            <li>Optimal component placement &amp; CPW sizing (w=40 μm) to reduce TLS loss &amp; crosstalk</li>
+            <li>Automatic frequency allocation for CR/CZ logic gates &amp; algorithms</li>
+            <li>Generates KLayout-verified <b>GDSII production mask files</b></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Synthesized Qubits, LabRAT3 TB1 Punchout & TLS/Via Metrology -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="card">
+        <h2>
+          <span>Synthesized 8-Qubit &amp; Readout Multiplexer Table (v1 Prior → v2 Cryo-Trimmed)</span>
+          <span class="badge badge-ok">BleximoX3 DRC: PASS</span>
+        </h2>
+        <table id="qubitTable">
+          <thead>
+            <tr>
+              <th>Qubit</th>
+              <th>Target f<sub>01</sub></th>
+              <th>L<sub>JJ</sub> (v1 → v2)</th>
+              <th>JJ Width (v1 → v2)</th>
+              <th>Target f<sub>RO</sub></th>
+              <th>RO sec7 (v1 → v2)</th>
+              <th>T<sub>1,TLS</sub></th>
+            </tr>
+          </thead>
+          <tbody id="qubitTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>
+          <span>LabRAT3_Full: Measured 8-Cavity VNA Punch-Out Shifts (Sample__TB1__QNL_8Q_Trailblazer1)</span>
+          <span style="font-size:0.75rem; color:var(--muted);">20220110 All Cavities.dir</span>
+        </h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Cavity</th>
+              <th>Window</th>
+              <th>Bare (+10 dBm)</th>
+              <th>Dressed (-25 dBm)</th>
+              <th>Lamb Shift Δf<sub>punchout</sub></th>
+              <th>Resonance Dip</th>
+            </tr>
+          </thead>
+          <tbody id="tb1TableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><span>Multi-Repo Foundry Metrology: cpw TLS Loss Tangents &amp; vias 3D Confocal Scan</span></h2>
+        <div class="sub-grid" style="margin-top:4px;">
+          <div style="font-size:0.78rem;">
+            <div style="color:var(--muted); margin-bottom:4px; font-weight:600;">NNLS Dielectric Loss Tangents (../cpw)</div>
+            <div>• Metal–Substrate (tan δ<sub>MS</sub>): <b>6.138 × 10⁻⁴</b></div>
+            <div>• Substrate–Air (tan δ<sub>SA</sub>): <b>1.645 × 10⁻³</b></div>
+            <div>• Metal–Air (tan δ<sub>MA</sub>): <b>3.277 × 10⁻³</b></div>
+            <div>• Bulk Silicon (tan δ<sub>Si</sub>): <b>2.578 × 10⁻⁷</b></div>
+          </div>
+          <div style="font-size:0.78rem;">
+            <div style="color:var(--muted); margin-bottom:4px; font-weight:600;">3D Laser Confocal TSV (../vias VK-X1000)</div>
+            <div>• Measured Etch Depth: <b>240.22 μm</b></div>
+            <div>• Top Opening: <b>131.5 μm</b> (CAD 200 μm)</div>
+            <div>• Bottom Diameter: <b>36.16 μm</b> (CAD 50 μm)</div>
+            <div>• Sidewall Taper Angle: <b>74.17°</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MANIFEST = {"v1_uncalibrated": {"chip_name": "Cerbero_8Q_v1_Uncalibrated", "architecture": "CR", "qpdk": {"name": "BleximoX3-Ta-Si-v1 (Uncalibrated HFSS Prior)", "Jc_A_per_m2": 628000.0, "aging_factor": 0.325, "jj_x_slope": 0.99501582, "jj_x_offset_um": 0.0493521522, "jj_y_slope": 0.97446094, "jj_y_offset_um": 0.0310809181, "jj_area_adj_pct": 0.0, "kinetic_inductance_fraction": 0.0, "eff_permittivity_scale": 1.0, "qubit_pad_cap_scale": 1.0, "freq_dispersion_sigma_ghz": 0.035, "chip_size_mm": 10.0, "chip_frame_um": 50.0, "min_feature_size_nm": 100.0, "m1_via_enc_um": 5.0, "m2_via_open_enc_um": 10.0}, "edges": [[0, 1], [2, 1], [2, 3], [0, 3], [4, 5], [6, 5], [6, 7], [4, 7], [0, 4], [2, 6], [5, 1], [7, 3]], "qubits": [{"qubit_id": 0, "target_freq_ghz": 5.7058, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.357, "synthesized_Lj_nH": 10.479, "jj_width_x_um": 0.224, "jj_width_y_um": 0.247, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 4.1121, "ro_sec7_length_mm": 0.9611, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 57.43, "predicted_cryo_freq_ghz": 5.7058, "predicted_cryo_ro_ghz": 6.357, "drc_passed": true}, {"qubit_id": 1, "target_freq_ghz": 5.8061, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.4161, "synthesized_Lj_nH": 10.118, "jj_width_x_um": 0.229, "jj_width_y_um": 0.252, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 4.0705, "ro_sec7_length_mm": 0.9196, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 56.9, "predicted_cryo_freq_ghz": 5.8061, "predicted_cryo_ro_ghz": 6.4162, "drc_passed": true}, {"qubit_id": 2, "target_freq_ghz": 5.7058, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.4753, "synthesized_Lj_nH": 10.479, "jj_width_x_um": 0.224, "jj_width_y_um": 0.247, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 4.0299, "ro_sec7_length_mm": 0.8789, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 56.38, "predicted_cryo_freq_ghz": 5.7058, "predicted_cryo_ro_ghz": 6.4753, "drc_passed": true}, {"qubit_id": 3, "target_freq_ghz": 5.1923, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.5344, "synthesized_Lj_nH": 12.672, "jj_width_x_um": 0.199, "jj_width_y_um": 0.222, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9902, "ro_sec7_length_mm": 0.8393, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 55.87, "predicted_cryo_freq_ghz": 5.1923, "predicted_cryo_ro_ghz": 6.5345, "drc_passed": true}, {"qubit_id": 4, "target_freq_ghz": 5.0813, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.5936, "synthesized_Lj_nH": 13.236, "jj_width_x_um": 0.194, "jj_width_y_um": 0.217, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9515, "ro_sec7_length_mm": 0.8005, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 55.37, "predicted_cryo_freq_ghz": 5.0813, "predicted_cryo_ro_ghz": 6.5935, "drc_passed": true}, {"qubit_id": 5, "target_freq_ghz": 5.1968, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.6527, "synthesized_Lj_nH": 12.651, "jj_width_x_um": 0.199, "jj_width_y_um": 0.222, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9136, "ro_sec7_length_mm": 0.7626, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 54.88, "predicted_cryo_freq_ghz": 5.1968, "predicted_cryo_ro_ghz": 6.6527, "drc_passed": true}, {"qubit_id": 6, "target_freq_ghz": 5.0921, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.7119, "synthesized_Lj_nH": 13.18, "jj_width_x_um": 0.194, "jj_width_y_um": 0.217, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.8766, "ro_sec7_length_mm": 0.7256, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 54.39, "predicted_cryo_freq_ghz": 5.0921, "predicted_cryo_ro_ghz": 6.7118, "drc_passed": true}, {"qubit_id": 7, "target_freq_ghz": 5.6055, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.771, "synthesized_Lj_nH": 10.861, "jj_width_x_um": 0.219, "jj_width_y_um": 0.242, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.8403, "ro_sec7_length_mm": 0.6894, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 53.92, "predicted_cryo_freq_ghz": 5.6055, "predicted_cryo_ro_ghz": 6.7711, "drc_passed": true}], "min_collision_margin_mhz": 83.24, "expected_yield_pct": 62.32, "reoptimized_yield_pct": 77.6, "drc_clean": true, "tls_loss_summary": {"loss_factor_MS": 0.00012222765671201862, "loss_tangent_MS": 0.000613830522694719, "loss_factor_SA": 0.0003289377692001681, "loss_tangent_SA": 0.0016446888460008404, "loss_factor_MA": 0.0006554105423292342, "loss_tangent_MA": 0.0032770527116461707, "loss_factor_Si": 2.578396091226868e-07, "loss_tangent_Si": 2.578396091226868e-07, "predicted_Q_TLS_w5um": 1270843.9, "predicted_T1_TLS_us_w5um_at_6p4GHz": 31.6, "predicted_Q_TLS_w40um": 2293934.5, "predicted_T1_TLS_us_w40um_at_6p4GHz": 57.05}, "tsv_metrology_summary": {}, "cryo_registry_samples": [{"id": "32", "category": "Cooldown", "name": "0001-01-01_Room_Temperature_Tests"}, {"id": "87", "category": "Cooldown", "name": "2022-02-09_Leaking"}, {"id": "166", "category": "Cooldown", "name": "2022-02-22"}, {"id": "386", "category": "Cooldown", "name": "2022-07-02"}, {"id": "457", "category": "Cooldown", "name": "2022-07-12"}, {"id": "519", "category": "Cooldown", "name": "2022-08-28"}, {"id": "655", "category": "Cooldown", "name": "2022-10-21"}, {"id": "752", "category": "Cooldown", "name": "2022-10-27"}, {"id": "33", "category": "SampleAlias", "name": "Tek-SSBM"}, {"id": "88", "category": "SampleAlias", "name": "TB1"}, {"id": "168", "category": "SampleAlias", "name": "TcM2"}, {"id": "387", "category": "SampleAlias", "name": "NIST_CC1"}, {"id": "458", "category": "SampleAlias", "name": "VT1"}, {"id": "521", "category": "SampleAlias", "name": "SQ3D1"}, {"id": "658", "category": "SampleAlias", "name": "SQ3D2"}, {"id": "36", "category": "SampleConfig", "name": "Sample__Tek-SSBM__AWG5012B_HP-E4407B"}, {"id": "92", "category": "SampleConfig", "name": "Sample__TB1__QNL_8Q_Trailblazer1"}, {"id": "170", "category": "SampleConfig", "name": "Sample__TcM2__Kurama1-0001-26-052"}, {"id": "389", "category": "SampleConfig", "name": "Sample__NIST_CC1__IBM_CopyCat1_CU_measured"}, {"id": "462", "category": "SampleConfig", "name": "Sample__VT1__wfrAST220222_X7Y1"}, {"id": "526", "category": "SampleConfig", "name": "Sample__SQ3D1__BMO220808-1-1"}, {"id": "661", "category": "SampleConfig", "name": "Sample__SQ3D2__BMO-221018-01-01_backup"}, {"id": "662", "category": "SampleConfig", "name": "Sample__SQ3D2__BMO-221018-01-01"}]}, "sim_to_real_diagnostics": {"uncalibrated_qubit_rmse_mhz": 269.6567911414792, "calibrated_qubit_rmse_mhz": 16.55933471516371, "uncalibrated_ro_rmse_mhz": 178.4868515378004, "calibrated_ro_rmse_mhz": 1.015208733029876, "measured_sigma_f_mhz": 17.697240353501744}, "labrat3_tb1_measurements": {"sample": "Sample__TB1__QNL_8Q_Trailblazer1", "cavities": [{"cavity_id": 0, "nominal_window_ghz": 6.357, "f_bare_10dbm_ghz": 6.35403, "f_dressed_m25dbm_ghz": 6.35744, "punchout_shift_mhz": 3.41, "dip_depth_db": -2.19}, {"cavity_id": 1, "nominal_window_ghz": 6.424, "f_bare_10dbm_ghz": 6.42124, "f_dressed_m25dbm_ghz": 6.42286, "punchout_shift_mhz": 1.62, "dip_depth_db": -1.45}, {"cavity_id": 2, "nominal_window_ghz": 6.481, "f_bare_10dbm_ghz": 6.47808, "f_dressed_m25dbm_ghz": 6.48102, "punchout_shift_mhz": 2.94, "dip_depth_db": -1.32}, {"cavity_id": 3, "nominal_window_ghz": 6.535, "f_bare_10dbm_ghz": 6.53227, "f_dressed_m25dbm_ghz": 6.53476, "punchout_shift_mhz": 2.49, "dip_depth_db": -1.65}, {"cavity_id": 4, "nominal_window_ghz": 6.588, "f_bare_10dbm_ghz": 6.58824, "f_dressed_m25dbm_ghz": 6.58876, "punchout_shift_mhz": 0.52, "dip_depth_db": -1.38}, {"cavity_id": 5, "nominal_window_ghz": 6.647, "f_bare_10dbm_ghz": 6.64557, "f_dressed_m25dbm_ghz": 6.64714, "punchout_shift_mhz": 1.57, "dip_depth_db": -1.37}, {"cavity_id": 6, "nominal_window_ghz": 6.708, "f_bare_10dbm_ghz": 6.70621, "f_dressed_m25dbm_ghz": 6.70768, "punchout_shift_mhz": 1.47, "dip_depth_db": -2.19}, {"cavity_id": 7, "nominal_window_ghz": 6.771, "f_bare_10dbm_ghz": 6.76816, "f_dressed_m25dbm_ghz": 6.77026, "punchout_shift_mhz": 2.1, "dip_depth_db": -1.14}], "measured_tb1_qubit_freqs_ghz": [5.29, 5.3645, 5.399, 5.4215, 5.46025, 5.48695, 5.5032, 5.5401]}, "v2_cryo_calibrated": {"chip_name": "Cerbero_8Q_v2_CryoCalibrated", "architecture": "CR", "qpdk": {"name": "BleximoX3-Ta-Si-v2 (Cryo + Metrology Calibrated)", "Jc_A_per_m2": 628000.0, "aging_factor": 0.325, "jj_x_slope": 0.99501582, "jj_x_offset_um": 0.0493521522, "jj_y_slope": 0.97446094, "jj_y_offset_um": 0.0310809181, "jj_area_adj_pct": -0.058, "kinetic_inductance_fraction": 0.03798, "eff_permittivity_scale": 1.018, "qubit_pad_cap_scale": 1.08681, "freq_dispersion_sigma_ghz": 0.0177, "chip_size_mm": 10.0, "chip_frame_um": 50.0, "min_feature_size_nm": 100.0, "m1_via_enc_um": 5.0, "m2_via_open_enc_um": 10.0}, "edges": [[0, 1], [2, 1], [2, 3], [0, 3], [4, 5], [6, 5], [6, 7], [4, 7], [0, 4], [2, 6], [5, 1], [7, 3]], "qubits": [{"qubit_id": 0, "target_freq_ghz": 5.7058, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.357, "synthesized_Lj_nH": 9.458, "jj_width_x_um": 0.238, "jj_width_y_um": 0.262, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9901, "ro_sec7_length_mm": 0.8391, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 57.43, "predicted_cryo_freq_ghz": 5.7058, "predicted_cryo_ro_ghz": 6.357, "drc_passed": true}, {"qubit_id": 1, "target_freq_ghz": 5.8061, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.4161, "synthesized_Lj_nH": 9.131, "jj_width_x_um": 0.243, "jj_width_y_um": 0.267, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9503, "ro_sec7_length_mm": 0.7993, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 56.9, "predicted_cryo_freq_ghz": 5.8061, "predicted_cryo_ro_ghz": 6.4161, "drc_passed": true}, {"qubit_id": 2, "target_freq_ghz": 5.7058, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.4753, "synthesized_Lj_nH": 9.458, "jj_width_x_um": 0.238, "jj_width_y_um": 0.262, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.9114, "ro_sec7_length_mm": 0.7604, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 56.38, "predicted_cryo_freq_ghz": 5.7058, "predicted_cryo_ro_ghz": 6.4753, "drc_passed": true}, {"qubit_id": 3, "target_freq_ghz": 5.1923, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.5344, "synthesized_Lj_nH": 11.439, "jj_width_x_um": 0.212, "jj_width_y_um": 0.235, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.8734, "ro_sec7_length_mm": 0.7224, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 55.87, "predicted_cryo_freq_ghz": 5.1923, "predicted_cryo_ro_ghz": 6.5344, "drc_passed": true}, {"qubit_id": 4, "target_freq_ghz": 5.0813, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.5936, "synthesized_Lj_nH": 11.948, "jj_width_x_um": 0.207, "jj_width_y_um": 0.23, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.8362, "ro_sec7_length_mm": 0.6853, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 55.37, "predicted_cryo_freq_ghz": 5.0813, "predicted_cryo_ro_ghz": 6.5936, "drc_passed": true}, {"qubit_id": 5, "target_freq_ghz": 5.1968, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.6527, "synthesized_Lj_nH": 11.419, "jj_width_x_um": 0.212, "jj_width_y_um": 0.236, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.7999, "ro_sec7_length_mm": 0.6489, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 54.88, "predicted_cryo_freq_ghz": 5.1968, "predicted_cryo_ro_ghz": 6.6527, "drc_passed": true}, {"qubit_id": 6, "target_freq_ghz": 5.0921, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.7119, "synthesized_Lj_nH": 11.897, "jj_width_x_um": 0.207, "jj_width_y_um": 0.23, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.7644, "ro_sec7_length_mm": 0.6134, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 54.39, "predicted_cryo_freq_ghz": 5.0921, "predicted_cryo_ro_ghz": 6.7119, "drc_passed": true}, {"qubit_id": 7, "target_freq_ghz": 5.6055, "target_anharm_ghz": -0.3, "target_ro_freq_ghz": 6.771, "synthesized_Lj_nH": 9.803, "jj_width_x_um": 0.233, "jj_width_y_um": 0.257, "pad_side_x_mm": 0.135, "pad_side_y_mm": 0.545, "ro_total_length_mm": 3.7297, "ro_sec7_length_mm": 0.5787, "ro_cpw_width_um": 40.0, "ro_predicted_q_tls": 2293934.5, "ro_predicted_t1_tls_us": 53.92, "predicted_cryo_freq_ghz": 5.6055, "predicted_cryo_ro_ghz": 6.771, "drc_passed": true}], "min_collision_margin_mhz": 83.24, "expected_yield_pct": 97.36, "reoptimized_yield_pct": 99.78, "drc_clean": true, "tls_loss_summary": {"loss_factor_MS": 0.00012222765671201862, "loss_tangent_MS": 0.000613830522694719, "loss_factor_SA": 0.0003289377692001681, "loss_tangent_SA": 0.0016446888460008404, "loss_factor_MA": 0.0006554105423292342, "loss_tangent_MA": 0.0032770527116461707, "loss_factor_Si": 2.578396091226868e-07, "loss_tangent_Si": 2.578396091226868e-07, "predicted_Q_TLS_w5um": 1270843.9, "predicted_T1_TLS_us_w5um_at_6p4GHz": 31.6, "predicted_Q_TLS_w40um": 2293934.5, "predicted_T1_TLS_us_w40um_at_6p4GHz": 57.05}, "tsv_metrology_summary": {}, "cryo_registry_samples": [{"id": "32", "category": "Cooldown", "name": "0001-01-01_Room_Temperature_Tests"}, {"id": "87", "category": "Cooldown", "name": "2022-02-09_Leaking"}, {"id": "166", "category": "Cooldown", "name": "2022-02-22"}, {"id": "386", "category": "Cooldown", "name": "2022-07-02"}, {"id": "457", "category": "Cooldown", "name": "2022-07-12"}, {"id": "519", "category": "Cooldown", "name": "2022-08-28"}, {"id": "655", "category": "Cooldown", "name": "2022-10-21"}, {"id": "752", "category": "Cooldown", "name": "2022-10-27"}, {"id": "33", "category": "SampleAlias", "name": "Tek-SSBM"}, {"id": "88", "category": "SampleAlias", "name": "TB1"}, {"id": "168", "category": "SampleAlias", "name": "TcM2"}, {"id": "387", "category": "SampleAlias", "name": "NIST_CC1"}, {"id": "458", "category": "SampleAlias", "name": "VT1"}, {"id": "521", "category": "SampleAlias", "name": "SQ3D1"}, {"id": "658", "category": "SampleAlias", "name": "SQ3D2"}, {"id": "36", "category": "SampleConfig", "name": "Sample__Tek-SSBM__AWG5012B_HP-E4407B"}, {"id": "92", "category": "SampleConfig", "name": "Sample__TB1__QNL_8Q_Trailblazer1"}, {"id": "170", "category": "SampleConfig", "name": "Sample__TcM2__Kurama1-0001-26-052"}, {"id": "389", "category": "SampleConfig", "name": "Sample__NIST_CC1__IBM_CopyCat1_CU_measured"}, {"id": "462", "category": "SampleConfig", "name": "Sample__VT1__wfrAST220222_X7Y1"}, {"id": "526", "category": "SampleConfig", "name": "Sample__SQ3D1__BMO220808-1-1"}, {"id": "661", "category": "SampleConfig", "name": "Sample__SQ3D2__BMO-221018-01-01_backup"}, {"id": "662", "category": "SampleConfig", "name": "Sample__SQ3D2__BMO-221018-01-01"}]}};
+    let currentStep = 6;
+    let showCalibrated = true;
+    let selectedQubit = 0;
+    let animTimer = null;
+
+    const STAGE_NAMES = {
+      1: "Step 1/6: Chip_Group → ChipSubstrate0 (Si) & ChipTopGND0 (Ta PEC)",
+      2: "Step 2/6: Synthesizing Launch Pads & Readout Multiplexer Buses",
+      3: "Step 3/6: Inverse-Synthesizing 8 Readout Resonators (R0–R7)",
+      4: "Step 4/6: Placing 8 Transmon Qubits & Manhattan JJs (Q0–Q7)",
+      5: "Step 5/6: Routing CR Coupling Buses & Through-Silicon Vias (TSVs)",
+      6: "Step 6/6: BleximoX3 DRC Sign-Off & Production GDSII Mask"
+    };
+
+    function populateTables() {
+      const v1Q = MANIFEST.v1_uncalibrated.qubits;
+      const v2Q = MANIFEST.v2_cryo_calibrated.qubits;
+      const tbody = document.getElementById("qubitTableBody");
+      tbody.innerHTML = "";
+      v2Q.forEach((q2, i) => {
+        const q1 = v1Q[i];
+        const tr = document.createElement("tr");
+        if (i === selectedQubit) tr.className = "selected-row";
+        tr.onclick = () => { selectedQubit = i; populateTables(); drawChip(); drawJJZoom(); };
+        tr.innerHTML = `
+          <td><b>Q${q2.qubit_id}</b></td>
+          <td>${q2.target_freq_ghz.toFixed(4)} GHz</td>
+          <td>${q1.synthesized_Lj_nH.toFixed(2)} → <b style="color:var(--cyan)">${q2.synthesized_Lj_nH.toFixed(2)} nH</b></td>
+          <td>${(q1.jj_width_x_um*1000).toFixed(0)} → <b style="color:var(--cyan)">${(q2.jj_width_x_um*1000).toFixed(0)} nm</b></td>
+          <td>${q2.target_ro_freq_ghz.toFixed(4)} GHz</td>
+          <td>${q1.ro_sec7_length_mm.toFixed(3)} → <b style="color:var(--teal)">${q2.ro_sec7_length_mm.toFixed(3)} mm</b></td>
+          <td>${q2.ro_predicted_t1_tls_us.toFixed(1)} μs</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const tb1Body = document.getElementById("tb1TableBody");
+      tb1Body.innerHTML = "";
+      const cavs = (MANIFEST.labrat3_tb1_measurements && MANIFEST.labrat3_tb1_measurements.cavities) || [];
+      cavs.forEach(c => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><b>C${c.cavity_id}</b></td>
+          <td>${c.nominal_window_ghz.toFixed(3)} GHz</td>
+          <td>${c.f_bare_10dbm_ghz.toFixed(6)} GHz</td>
+          <td>${c.f_dressed_m25dbm_ghz.toFixed(6)} GHz</td>
+          <td style="color:var(--green); font-weight:700;">+${c.punchout_shift_mhz.toFixed(2)} MHz</td>
+          <td>${c.dip_depth_db.toFixed(2)} dB</td>
+        `;
+        tb1Body.appendChild(tr);
+      });
+    }
+
+    function mmToPx(x_mm, y_mm, w, h) {
+      const scale = Math.min(w, h) / 5.6;
+      return [w / 2 + x_mm * scale, h / 2 - y_mm * scale, scale];
+    }
+
+    function drawChip() {
+      const canvas = document.getElementById("chipCanvas");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      document.getElementById("stageLabel").innerText = STAGE_NAMES[currentStep];
+      const activeManifest = showCalibrated ? MANIFEST.v2_cryo_calibrated : MANIFEST.v1_uncalibrated;
+
+      // Grid
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      ctx.lineWidth = 1;
+      for (let m = -2.5; m <= 2.5; m += 0.5) {
+        const [px] = mmToPx(m, 0, W, H);
+        const [, py] = mmToPx(0, m, W, H);
+        ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+      }
+
+      // Step 1: ChipSubstrate0 & ChipTopGND0 (5x5 mm)
+      const [x0, y0, scale] = mmToPx(-2.5, 2.5, W, H);
+      ctx.fillStyle = "#161f2e";
+      ctx.strokeStyle = "#60a5fa";
+      ctx.lineWidth = 2;
+      ctx.fillRect(x0, y0, 5.0 * scale, 5.0 * scale);
+      ctx.strokeRect(x0, y0, 5.0 * scale, 5.0 * scale);
+
+      // Step 2: Launch Pads & Readout Multiplexer Buses
+      if (currentStep >= 2) {
+        [1.55, -1.55].forEach(by => {
+          const [bx1, byPx] = mmToPx(-2.15, by, W, H);
+          const [bx2] = mmToPx(2.15, by, W, H);
+          ctx.strokeStyle = "#38bdf8";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.moveTo(bx1, byPx); ctx.lineTo(bx2, byPx); ctx.stroke();
+
+          [-2.25, 2.25].forEach(lx => {
+            const [lxPx, lyPx] = mmToPx(lx - 0.12, by + 0.10, W, H);
+            ctx.fillStyle = "#38bdf8";
+            ctx.fillRect(lxPx, lyPx, 0.24 * scale, 0.20 * scale);
+          });
+        });
+      }
+
+      const xCols = [-1.45, -0.48, 0.48, 1.45];
+      const qCoords = {};
+
+      activeManifest.qubits.forEach((q, idx) => {
+        const col = idx % 4;
+        const isTop = idx < 4;
+        const qx = xCols[col];
+        const busY = isTop ? 1.55 : -1.55;
+        const dirY = isTop ? -1.0 : 1.0;
+        const sec7 = q.ro_sec7_length_mm;
+
+        // Meander centerline
+        const pts = [[qx, busY + dirY * 0.045]];
+        let cy = busY + dirY * 0.12;
+        pts.push([qx, cy]);
+        for (let m = 0; m < 3; m++) {
+          pts.push([qx + 0.18, cy]);
+          cy += dirY * 0.085;
+          pts.push([qx + 0.18, cy]);
+          pts.push([qx - 0.18, cy]);
+          cy += dirY * 0.085;
+          pts.push([qx - 0.18, cy]);
+        }
+        pts.push([qx, cy]);
+        const cyEnd = cy + dirY * (0.28 * sec7);
+        pts.push([qx, cyEnd]);
+
+        if (currentStep >= 3) {
+          ctx.strokeStyle = showCalibrated ? "#2ec4b6" : "#ff595e";
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          pts.forEach((p, pi) => {
+            const [px, py] = mmToPx(p[0], p[1], W, H);
+            if (pi === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          });
+          ctx.stroke();
+        }
+
+        const qy = cyEnd + dirY * 0.34;
+        qCoords[idx] = [qx, qy];
+
+        if (currentStep >= 4) {
+          const [pxPocket, pyPocket] = mmToPx(qx - 0.17, qy + 0.20, W, H);
+          ctx.fillStyle = "#0b0f17";
+          ctx.strokeStyle = idx === selectedQubit ? "#00f5d4" : "#64748b";
+          ctx.lineWidth = idx === selectedQubit ? 2.2 : 1.0;
+          ctx.fillRect(pxPocket, pyPocket, 0.34 * scale, 0.40 * scale);
+          ctx.strokeRect(pxPocket, pyPocket, 0.34 * scale, 0.40 * scale);
+
+          // Left & Right Transmon Capacitor Pads
+          const [pxL, pyL] = mmToPx(qx - 0.13, qy + 0.16, W, H);
+          const [pxR, pyR] = mmToPx(qx + 0.02, qy + 0.16, W, H);
+          ctx.fillStyle = "#e09f67";
+          ctx.fillRect(pxL, pyL, 0.11 * scale, 0.32 * scale);
+          ctx.fillRect(pxR, pyR, 0.11 * scale, 0.32 * scale);
+
+          // Manhattan JJ dot
+          const [jpx, jpy] = mmToPx(qx, qy, W, H);
+          ctx.fillStyle = "#00f5d4";
+          ctx.beginPath(); ctx.arc(jpx, jpy, 4, 0, Math.PI * 2); ctx.fill();
+
+          ctx.fillStyle = "#e6edf3";
+          ctx.font = "bold 11px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`Q${idx} (${q.target_freq_ghz.toFixed(2)}G)`, jpx, jpy + (isTop ? -28 : 36));
+        }
+      });
+
+      // Step 5: CR Couplers & TSVs
+      if (currentStep >= 5) {
+        ctx.strokeStyle = "rgba(167, 139, 250, 0.7)";
+        ctx.setLineDash([5, 4]);
+        ctx.lineWidth = 1.5;
+        activeManifest.edges.forEach(e => {
+          const [u, v] = e;
+          if (qCoords[u] && qCoords[v]) {
+            const [x1, y1] = mmToPx(qCoords[u][0], qCoords[u][1], W, H);
+            const [x2, y2] = mmToPx(qCoords[v][0], qCoords[v][1], W, H);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+          }
+        });
+        ctx.setLineDash([]);
+
+        const tsvs = [
+          [-1.95, 0], [-0.96, 0], [0, 0], [0.96, 0], [1.95, 0],
+          [-1.95, 1.85], [-0.65, 1.85], [0.65, 1.85], [1.95, 1.85],
+          [-1.95, -1.85], [-0.65, -1.85], [0.65, -1.85], [1.95, -1.85]
+        ];
+        tsvs.forEach(t => {
+          const [tx, ty] = mmToPx(t[0], t[1], W, H);
+          ctx.strokeStyle = "#fbbf24";
+          ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.arc(tx, ty, 0.09 * scale, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = "#fbbf24";
+          ctx.beginPath(); ctx.arc(tx, ty, 0.03 * scale, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+    }
+
+    function drawJJZoom() {
+      const canvas = document.getElementById("jjCanvas");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const q1 = MANIFEST.v1_uncalibrated.qubits[selectedQubit];
+      const q2 = MANIFEST.v2_cryo_calibrated.qubits[selectedQubit];
+
+      const cx = W / 2, cy = H / 2;
+      const w1Px = q1.jj_width_x_um * 110;
+      const w2Px = q2.jj_width_x_um * 110;
+
+      // v2 Cryo-Calibrated Manhattan Cross
+      ctx.fillStyle = "rgba(0, 245, 212, 0.85)";
+      ctx.fillRect(cx - 95, cy - w2Px / 2, 190, w2Px);
+      ctx.fillRect(cx - w2Px / 2, cy - 55, w2Px, 110);
+
+      // v1 Uncalibrated dashed outline
+      ctx.strokeStyle = "#ff595e";
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(cx - 95, cy - w1Px / 2, 190, w1Px);
+      ctx.strokeRect(cx - w1Px / 2, cy - 55, w1Px, 110);
+      ctx.setLineDash([]);
+
+      // Undercut boxes
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillRect(cx - 115, cy - 16, 18, 32);
+      ctx.fillRect(cx + 97, cy - 16, 18, 32);
+
+      ctx.fillStyle = "#e6edf3";
+      ctx.font = "11px sans-serif";
+      ctx.fillText(`Q${selectedQubit} Manhattan JJ: v1=${(q1.jj_width_x_um*1000).toFixed(0)}nm → v2=${(q2.jj_width_x_um*1000).toFixed(0)}nm`, 10, 18);
+      ctx.fillStyle = "#8b949e";
+      ctx.fillText(`L_JJ: ${q1.synthesized_Lj_nH.toFixed(2)} nH → ${q2.synthesized_Lj_nH.toFixed(2)} nH`, 10, 145);
+    }
+
+    function setStep(s) {
+      currentStep = s;
+      document.getElementById("stepSlider").value = s;
+      drawChip();
+    }
+
+    function toggleCalibrationMode() {
+      showCalibrated = !showCalibrated;
+      const btn = document.getElementById("btnToggleCal");
+      btn.innerText = showCalibrated ? "Showing: v2 (10 mK Cryo-Calibrated)" : "Showing: v1 (Uncalibrated HFSS Prior)";
+      btn.className = showCalibrated ? "active" : "";
+      drawChip();
+    }
+
+    function togglePlayAnimation() {
+      const btn = document.getElementById("btnPlay");
+      if (animTimer) {
+        clearInterval(animTimer);
+        animTimer = null;
+        btn.innerText = "▶ Play HFSS/GDS Construction Video";
+        return;
+      }
+      currentStep = 1;
+      setStep(1);
+      btn.innerText = "⏸ Pause Construction Video";
+      animTimer = setInterval(() => {
+        currentStep = (currentStep % 6) + 1;
+        setStep(currentStep);
+      }, 950);
+    }
+
+    document.getElementById("chipCanvas").addEventListener("click", (ev) => {
+      const rect = ev.target.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) * (ev.target.width / rect.width);
+      const y = (ev.clientY - rect.top) * (ev.target.height / rect.height);
+      const scale = Math.min(ev.target.width, ev.target.height) / 5.6;
+      const x_mm = (x - ev.target.width / 2) / scale;
+      const y_mm = (ev.target.height / 2 - y) / scale;
+      const xCols = [-1.45, -0.48, 0.48, 1.45];
+      let bestIdx = selectedQubit, bestDist = 999;
+      for (let i = 0; i < 8; i++) {
+        const qx = xCols[i % 4];
+        const qy = i < 4 ? 0.05 : -0.05;
+        const d = Math.hypot(x_mm - qx, y_mm - qy);
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
+      }
+      selectedQubit = bestIdx;
+      populateTables();
+      drawChip();
+      drawJJZoom();
+    });
+
+    populateTables();
+    drawChip();
+    drawJJZoom();
+  </script>
+</body>
+</html>
